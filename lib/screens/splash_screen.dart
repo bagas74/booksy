@@ -1,12 +1,10 @@
-// lib/ui/splash_screen/splash_screen.dart
+// lib/screens/splash_screen.dart
 
 import 'package:flutter/material.dart';
 import 'dart:async'; // Diperlukan untuk Future.delayed
 
-// Asumsikan ini adalah halaman utama aplikasi kamu.
-// Pastikan path ini benar sesuai lokasi file home_page.dart kamu,
-// misal: lib/ui/home/home_page.dart
-import 'home_screen.dart';
+// Mengarahkan ke OnboardingScreen yang baru, yang juga berada di folder 'screens'
+import 'package:nama_aplikasi_kamu/screens/onboarding_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -19,36 +17,35 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    // Panggil fungsi untuk navigasi setelah splash screen tampil
-    _navigateToHome();
+    _navigateToNextScreen(); // Mengganti nama fungsi agar lebih generik
   }
 
-  // Fungsi untuk menunda navigasi dan kemudian pindah ke halaman utama
-  _navigateToHome() async {
+  // Fungsi untuk menunda navigasi dan kemudian pindah ke halaman berikutnya
+  _navigateToNextScreen() async {
     // Menunggu selama 3 detik. Kamu bisa sesuaikan durasinya.
     await Future.delayed(const Duration(seconds: 3), () {});
 
-    // Navigasi ke HomePage setelah penundaan.
+    // Navigasi ke OnboardingScreen setelah penundaan.
     // pushReplacement digunakan agar pengguna tidak bisa kembali ke splash screen
     // dengan tombol back.
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => const HomeScreen()),
+      MaterialPageRoute(builder: (context) => const OnboardingScreen()), // Navigasi ke OnboardingScreen
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 252, 252, 252), // Warna latar belakang splash screen
+      backgroundColor: const Color.fromARGB(255, 252, 252, 252), // Warna latar belakang splash screen (putih)
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center, // Pusatkan konten secara vertikal
           children: <Widget>[
             // Widget untuk menampilkan logo.
-            // Pastikan kamu punya file gambar logo di 'assets/images/logo.png'
+            // Pastikan kamu punya file gambar logo di 'assets/images/logobooksy.png'
             Image.asset(
-              'assets/images/logobooksy.png', // Sesuaikan path jika berbeda
+              'assets/images/logobooksy.png', // Path logo kamu
               width: 150, // Sesuaikan lebar logo
               height: 150, // Sesuaikan tinggi logo
               // fit: BoxFit.contain, // Opsional: cara gambar menyesuaikan diri
@@ -58,7 +55,7 @@ class _SplashScreenState extends State<SplashScreen> {
             const Text(
               'Booksy',
               style: TextStyle(
-                color: Color.fromRGBO(27, 133, 255, 1), // Warna teks putih
+                color: Color.fromRGBO(27, 133, 255, 1), // Warna teks (biru)
                 fontSize: 48, // Ukuran font besar
                 fontWeight: FontWeight.bold, // Teks tebal
                 // fontFamily: 'Montserrat', // Opsional: Gunakan custom font jika sudah ditambahkan di pubspec.yaml
@@ -66,8 +63,10 @@ class _SplashScreenState extends State<SplashScreen> {
             ),
             const SizedBox(height: 30), // Spasi vertikal di bawah teks
             // Indikator loading (lingkaran berputar)
-            const CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.white), // Warna indikator putih
+            CircularProgressIndicator(
+              // Ubah warna indikator agar terlihat di latar belakang putih
+              // Misalnya, gunakan warna yang sama dengan teks atau warna gelap
+              valueColor: AlwaysStoppedAnimation<Color>(const Color.fromRGBO(27, 133, 255, 1)), // Menggunakan warna biru yang sama dengan teks
             ),
           ],
         ),
