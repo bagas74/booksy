@@ -150,13 +150,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 overflow: TextOverflow.ellipsis,
               ),
               Text(
-                product.author,
+                product.kategori,
                 style: const TextStyle(fontSize: 12, color: Colors.black54),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
               Text(
-                product.genre,
+                product.author,
                 style: const TextStyle(fontSize: 12, color: Colors.black38),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
