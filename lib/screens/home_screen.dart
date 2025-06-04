@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/product.dart';
 import 'product_detail.dart';
 
@@ -10,6 +11,14 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final SupabaseClient _client = Supabase.instance.client;
+
+  Future<List<Product>> fetchProductsByType(String type) async {
+    final response = await _client.from('products').select().eq('type', type);
+
+    return (response as List).map((map) => Product.fromJson(map)).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -56,18 +65,34 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
               const SizedBox(height: 16),
-              SizedBox(
-                height: 280,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  shrinkWrap: true,
-                  physics: const BouncingScrollPhysics(),
-                  children:
-                      trendingProducts
-                          .map((product) => productCard(context, product))
-                          .toList(),
-                ),
+
+              /// FutureBuilder untuk Trending
+              FutureBuilder<List<Product>>(
+                future: fetchProductsByType('trending'),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const SizedBox(
+                      height: 280,
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  } else if (snapshot.hasError) {
+                    return const Text('Gagal memuat data trending');
+                  }
+
+                  final products = snapshot.data ?? [];
+                  return SizedBox(
+                    height: 280,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
+                      children:
+                          products.map((p) => productCard(context, p)).toList(),
+                    ),
+                  );
+                },
               ),
+
+              const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: const [
@@ -79,17 +104,31 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
               const SizedBox(height: 12),
-              SizedBox(
-                height: 340,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  shrinkWrap: true,
-                  physics: const BouncingScrollPhysics(),
-                  children:
-                      newProducts
-                          .map((product) => productCard(context, product))
-                          .toList(),
-                ),
+
+              /// FutureBuilder untuk New
+              FutureBuilder<List<Product>>(
+                future: fetchProductsByType('new'),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const SizedBox(
+                      height: 340,
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  } else if (snapshot.hasError) {
+                    return const Text('Gagal memuat data terbaru');
+                  }
+
+                  final products = snapshot.data ?? [];
+                  return SizedBox(
+                    height: 340,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
+                      children:
+                          products.map((p) => productCard(context, p)).toList(),
+                    ),
+                  );
+                },
               ),
             ],
           ),
@@ -98,11 +137,11 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  /// Widget untuk menampilkan kartu produk
   Widget productCard(BuildContext context, Product product) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Kartu dengan gambar dan shadow
         GestureDetector(
           onTap: () {
             Navigator.push(
@@ -128,15 +167,19 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(16),
-              child: Image.asset(product.image, fit: BoxFit.cover),
+              child: Image.network(
+                product.image,
+                fit: BoxFit.cover,
+                errorBuilder:
+                    (context, error, stackTrace) =>
+                        const Icon(Icons.broken_image),
+              ),
             ),
           ),
         ),
-
-        // Text di luar gambar (bukan bagian dari kartu)
         const SizedBox(height: 8),
         SizedBox(
-          width: 140, // Samakan dengan lebar gambar
+          width: 140,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

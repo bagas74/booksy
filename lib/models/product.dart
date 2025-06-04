@@ -14,47 +14,15 @@ class Product {
     required this.description,
     required this.image,
   });
+
+  factory Product.fromJson(Map<String, dynamic> json) {
+    return Product(
+      name: json['name'],
+      author: json['author'],
+      kategori: json['kategori'],
+      genre: json['genre'],
+      description: json['description'],
+      image: json['image'], // Ini hanya path dari storage Supabase
+    );
+  }
 }
-
-final trendingProducts = [
-  Product(
-    name: "Fatherhood",
-    author: "Marcus Berkmann",
-    kategori: "Novel",
-    genre: "Action, Fight, Adventure",
-    description:
-        "A humorous take on modern parenting. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. ",
-    image: 'assets/images/bumi1.jpg',
-  ),
-  Product(
-    name: "Hujan",
-    author: "Tere Liye",
-    kategori: "Novel",
-    genre: "Action, Fight, Adventure",
-    description:
-        "A humorous take on modern parenting. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. ",
-    image: 'assets/images/hujan2.jpg',
-  ),
-];
-
-final newProducts = [
-  Product(
-    name: "Bumi",
-    author: "Tere Liye",
-    kategori: "Novel",
-    genre: "Action, Fight, Adventure",
-    description:
-        "Petualangan remaja di dunia paralel penuh misteri. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-    image: 'assets/images/bumi1.jpg',
-  ),
-  Product(
-    name: "Fatherhood",
-    author: "Marcus Berkmann",
-    kategori: "Cerpen",
-    genre: "Action, Fight, Adventure",
-    description:
-        "A humorous take on modern parenting Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-    image: 'assets/images/bumi1.jpg',
-  ),
-  // Tambahkan produk lainnya...
-];
