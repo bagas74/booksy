@@ -43,7 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 16),
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: Image.asset(''),
+                child: Image.asset('assets/images/banner.jpg'),
               ),
               const SizedBox(height: 16),
               Row(

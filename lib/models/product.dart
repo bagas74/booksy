@@ -27,7 +27,7 @@ final trendingProducts = [
     author: "Marcus Berkmann",
     genre: "Parenting",
     description: "A humorous take on modern parenting.",
-    image: 'assets/images/bumi1.jpg',
+    image: 'assets/images/hujan2.jpg',
   ),
   // Tambahkan produk lainnya...
 ];
