@@ -57,15 +57,15 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 16),
               SizedBox(
-                height: 200,
+                height: 280,
                 child: ListView(
                   scrollDirection: Axis.horizontal,
                   shrinkWrap: true,
                   physics: const BouncingScrollPhysics(),
-                  // children:
-                  //       trendingProducts
-                  //       .map((products) => productCard(context, product))
-                  //       toList(),
+                  children:
+                      trendingProducts
+                          .map((product) => productCard(context, product))
+                          .toList(),
                 ),
               ),
               Row(
@@ -85,10 +85,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   scrollDirection: Axis.horizontal,
                   shrinkWrap: true,
                   physics: const BouncingScrollPhysics(),
-                  // children:
-                  //       newProducts
-                  //       .map((products) => productCard(context, product))
-                  //       toList(),
+                  children:
+                      newProducts
+                          .map((product) => productCard(context, product))
+                          .toList(),
                 ),
               ),
             ],

@@ -22,7 +22,7 @@ class ProductDetail extends StatelessWidget {
             style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
-          Text('\$${product.price.toStringAsFixed(2)}'),
+          Text(product.description),
           const SizedBox(height: 20),
           Padding(
             padding: const EdgeInsets.all(16.0),
@@ -32,7 +32,7 @@ class ProductDetail extends StatelessWidget {
                 backgroundColor: Colors.green,
                 minimumSize: const Size(double.infinity, 50),
               ),
-              child: const Text("Add To Basket"),
+              child: const Text("Pinjam"),
             ),
           ),
         ],

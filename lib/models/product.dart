@@ -2,55 +2,34 @@ class Product {
   final String name;
   final String author;
   final String genre;
-  final double price;
+  final String description;
   final String image;
 
   Product({
     required this.name,
     required this.author,
     required this.genre,
-    required this.price,
+    required this.description,
     required this.image,
   });
 }
 
-final demoProducts = [
+final trendingProducts = [
   Product(
     name: "Fatherhood",
     author: "Marcus Berkmann",
     genre: "Parenting",
-    price: 4.99,
+    description: "A humorous take on modern parenting.",
     image: 'assets/images/bumi1.jpg',
   ),
   Product(
     name: "Fatherhood",
     author: "Marcus Berkmann",
     genre: "Parenting",
-    price: 4.99,
+    description: "A humorous take on modern parenting.",
     image: 'assets/images/bumi1.jpg',
   ),
-  Product(
-    name: "Fatherhood",
-    author: "Marcus Berkmann",
-    genre: "Parenting",
-    price: 4.99,
-    image: 'assets/images/bumi1.jpg',
-  ),
-  Product(
-    name: "Fatherhood",
-    author: "Marcus Berkmann",
-    genre: "Parenting",
-    price: 4.99,
-    image: 'assets/images/bumi1.jpg',
-  ),
-  Product(
-    name: "Fatherhood",
-    author: "Marcus Berkmann",
-    genre: "Parenting",
-    price: 4.99,
-    image: 'assets/images/bumi1.jpg',
-  ),
-  // Tambahkan data lainnya...
+  // Tambahkan produk lainnya...
 ];
 
 final newProducts = [
@@ -58,44 +37,15 @@ final newProducts = [
     name: "Bumi",
     author: "Tere Liye",
     genre: "Fiksi",
-    price: 4.99,
+    description: "Petualangan remaja di dunia paralel penuh misteri.",
     image: 'assets/images/bumi1.jpg',
   ),
   Product(
     name: "Fatherhood",
     author: "Marcus Berkmann",
     genre: "Parenting",
-    price: 4.99,
+    description: "A humorous take on modern parenting.",
     image: 'assets/images/bumi1.jpg',
   ),
-  Product(
-    name: "Fatherhood",
-    author: "Marcus Berkmann",
-    genre: "Parenting",
-    price: 4.99,
-    image: 'assets/images/bumi1.jpg',
-  ),
-  Product(
-    name: "Fatherhood",
-    author: "Marcus Berkmann",
-    genre: "Parenting",
-    price: 4.99,
-    image: 'assets/images/bumi1.jpg',
-  ),
-  Product(
-    name: "Fatherhood",
-    author: "Marcus Berkmann",
-    genre: "Parenting",
-    price: 4.99,
-    image: 'assets/images/bumi1.jpg',
-  ),
-  Product(
-    name: "Fatherhood",
-    author: "Marcus Berkmann",
-    genre: "Parenting",
-    price: 4.99,
-    image: 'assets/images/bumi1.jpg',
-  ),
-
-  // Tambahkan data lainnya...
+  // Tambahkan produk lainnya...
 ];
