@@ -6,7 +6,7 @@ class ProductService {
 
   Future<List<Product>> fetchProductsByType(String type) async {
     final response = await _client
-        .from('products')
+        .from('books')
         .select()
         .eq('type', type); // 'trending' atau 'new'
 

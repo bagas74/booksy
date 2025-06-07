@@ -5,6 +5,8 @@ class Product {
   final String genre;
   final String description;
   final String image;
+  final String file; // tambahan
+  bool isBorrowed; // status dipinjam
 
   Product({
     required this.name,
@@ -13,16 +15,20 @@ class Product {
     required this.genre,
     required this.description,
     required this.image,
+    required this.file, // tambahan
+    this.isBorrowed = false,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
-      name: json['name'],
-      author: json['author'],
-      kategori: json['kategori'],
-      genre: json['genre'],
-      description: json['description'],
-      image: json['image'], // Ini hanya path dari storage Supabase
+      name: json['title'] ?? '',
+      author: json['author'] ?? '',
+      kategori: json['category'] ?? '',
+      genre: json['genre'] ?? '',
+      description: json['description'] ?? '',
+      image: json['image_url'] ?? '',
+      file: json['file_url'] ?? '', // Pastikan aman walau kosong/null
+      isBorrowed: false, // default
     );
   }
 }
