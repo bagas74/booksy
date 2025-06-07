@@ -198,7 +198,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 overflow: TextOverflow.ellipsis,
               ),
               Text(
-                product.author,
+                product.penulis,
                 style: const TextStyle(fontSize: 12, color: Colors.black38),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,

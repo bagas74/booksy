@@ -17,9 +17,9 @@ class ProductDetail extends StatelessWidget {
       body: SafeArea(
         child: ListView(
           children: [
+            // Bagian gambar atas
             Stack(
               children: [
-                // Gambar blur background
                 Container(
                   height: MediaQuery.of(context).size.height * 0.45,
                   width: double.infinity,
@@ -27,28 +27,16 @@ class ProductDetail extends StatelessWidget {
                     imageFilter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
                     child: Image.network(
                       product.image,
-                      height: 150,
-                      width: double.infinity,
                       fit: BoxFit.cover,
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return const Center(child: CircularProgressIndicator());
-                      },
-                      errorBuilder: (context, error, stackTrace) {
-                        return const Center(
-                          child: Icon(Icons.broken_image, size: 50),
-                        );
-                      },
+                      errorBuilder:
+                          (context, error, stackTrace) =>
+                              const Icon(Icons.broken_image, size: 50),
                     ),
                   ),
                 ),
-
-                // Lapisan overlay putih semi transparan
                 Positioned.fill(
                   child: Container(color: Colors.white.withOpacity(0.6)),
                 ),
-
-                // Gambar buku utama (atas tengah)
                 Center(
                   child: Padding(
                     padding: const EdgeInsets.only(top: 100.0),
@@ -56,127 +44,99 @@ class ProductDetail extends StatelessWidget {
                       product.image,
                       height: 200,
                       fit: BoxFit.contain,
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return const CircularProgressIndicator();
-                      },
-                      errorBuilder: (context, error, stackTrace) {
-                        return const Icon(Icons.broken_image, size: 100);
-                      },
+                      errorBuilder:
+                          (context, error, stackTrace) =>
+                              const Icon(Icons.broken_image, size: 100),
                     ),
                   ),
                 ),
               ],
             ),
 
-            const SizedBox(height: 8),
-
-            // Judul buku
-            Center(
-              child: Text(
-                product.name,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
+            // Container untuk bagian informasi
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Color.fromARGB(
+                  255,
+                  255,
+                  255,
+                  255,
+                ), // Ganti dengan warna background yang diinginkan
               ),
-            ),
-
-            const SizedBox(height: 8),
-
-            // Kategori
-            Padding(
-              padding: const EdgeInsets.only(left: 20),
-              child: Text(product.kategori),
-            ),
-
-            const SizedBox(height: 16),
-
-            // Rating dummy
-            Padding(
-              padding: const EdgeInsets.only(left: 20),
-              child: Row(
-                children: [
-                  ...List.generate(
-                    5,
-                    (index) =>
-                        const Icon(Icons.star, color: Colors.orange, size: 24),
-                  ),
-                  const SizedBox(width: 8),
-                  const Text('5', style: TextStyle(fontSize: 16)),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // Penulis
-            Padding(
-              padding: const EdgeInsets.only(left: 20),
-              child: Row(
-                children: [
-                  const Text(
-                    'Author',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(width: 15),
-                  Text(product.author),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 8),
-
-            // Genre
-            Padding(
-              padding: const EdgeInsets.only(left: 20),
-              child: Row(
-                children: [
-                  const Text(
-                    'Genre',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(width: 15),
-                  Text(product.genre),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 8),
-
-            // Deskripsi
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  const SizedBox(height: 8),
+                  Center(
+                    child: Text(
+                      product.name,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(product.kategori),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      ...List.generate(
+                        5,
+                        (index) => const Icon(
+                          Icons.star,
+                          color: Colors.orange,
+                          size: 24,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const Text('5', style: TextStyle(fontSize: 16)),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      const Text(
+                        'Penulis',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(width: 15),
+                      Text(product.penulis),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      const Text(
+                        'Genre',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(width: 15),
+                      Text(product.genre),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
                   const Text(
                     'Deskripsi',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   const SizedBox(height: 8),
                   Text(product.description),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF6C4ED5),
+                      minimumSize: const Size(double.infinity, 50),
+                    ),
+                    child: const Text(
+                      "Pinjam",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
                 ],
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            // Tombol pinjam
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: ElevatedButton(
-                onPressed: () {
-                  // Aksi pinjam
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF6C4ED5),
-                  minimumSize: const Size(double.infinity, 50),
-                ),
-                child: const Text(
-                  "Pinjam",
-                  style: TextStyle(color: Colors.white),
-                ),
               ),
             ),
           ],

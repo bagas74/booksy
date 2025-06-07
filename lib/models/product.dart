@@ -1,6 +1,6 @@
 class Product {
   final String name;
-  final String author;
+  final String penulis;
   final String kategori;
   final String genre;
   final String description;
@@ -10,7 +10,7 @@ class Product {
 
   Product({
     required this.name,
-    required this.author,
+    required this.penulis,
     required this.kategori,
     required this.genre,
     required this.description,
@@ -22,7 +22,7 @@ class Product {
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
       name: json['title'] ?? '',
-      author: json['author'] ?? '',
+      penulis: json['penulis'] ?? '',
       kategori: json['category'] ?? '',
       genre: json['genre'] ?? '',
       description: json['description'] ?? '',
