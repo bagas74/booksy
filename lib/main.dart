@@ -1,28 +1,51 @@
-import 'screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'screens/home_screen.dart';
+import 'config/config.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   await Supabase.initialize(
-    url:
-        'https://eifwtejrfswcizdtihwl.supabase.co', // Ganti dengan URL proyekmu
-    anonKey:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpZnd0ZWpyZnN3Y2l6ZHRpaHdsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkwMjg1ODAsImV4cCI6MjA2NDYwNDU4MH0.A2bqQU3AgI6SrFvAVDPn_0GTRedE0LWdqRJyEEgHfr4',
+    url: SupabaseConfig.supabaseUrl,
+    anonKey: SupabaseConfig.supabaseAnonKey,
   );
 
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  bool _initialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    initializeApp();
+  }
+
+  Future<void> initializeApp() async {
+    // Bisa tambahkan logika lain kalau perlu
+    await Future.delayed(const Duration(milliseconds: 500));
+    setState(() => _initialized = true);
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Booksy',
       theme: ThemeData(fontFamily: 'Poppins'),
-      home: const HomeScreen(),
+      home:
+          _initialized
+              ? const HomeScreen()
+              : const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              ),
     );
   }
 }
