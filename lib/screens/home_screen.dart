@@ -4,6 +4,7 @@ import '../models/product.dart';
 import '../widgets/bottom_nav_bar.dart';
 import '../widgets/product_card.dart';
 import 'search_screen.dart';
+import '../config/config.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
