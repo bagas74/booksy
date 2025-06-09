@@ -37,6 +37,8 @@ dependencies:
   supabase_flutter: ^2.9.0
   google_fonts: ^6.1.0
   font_awesome_flutter: ^10.6.0
+  date_time_format: ^2.0.1
+  intl: ^0.20.2
 
 dev_dependencies:
   flutter_test:

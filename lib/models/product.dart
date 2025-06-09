@@ -1,34 +1,51 @@
 class Product {
-  final String name;
+  final String judul;
   final String penulis;
   final String kategori;
-  final String genre;
-  final String description;
+  final String deskripsi;
+  final String bahasa;
+  final DateTime? tanggalRilis; // Diubah menjadi DateTime dan boleh null
+  final String penerbit;
+  final String halaman;
   final String image;
-  final String file; // tambahan
-  bool isBorrowed; // status dipinjam
+  final String file;
+  final String format;
+  bool isBorrowed;
 
   Product({
-    required this.name,
+    required this.judul,
     required this.penulis,
     required this.kategori,
-    required this.genre,
-    required this.description,
+    required this.deskripsi,
     required this.image,
-    required this.file, // tambahan
+    required this.file,
+    required this.bahasa,
+    required this.halaman,
+    required this.penerbit,
+    this.tanggalRilis, // Tidak wajib diisi
+    required this.format,
     this.isBorrowed = false,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
-      name: json['title'] ?? '',
+      judul: json['judul'] ?? '',
       penulis: json['penulis'] ?? '',
-      kategori: json['category'] ?? '',
-      genre: json['genre'] ?? '',
-      description: json['description'] ?? '',
-      image: json['image_url'] ?? '',
-      file: json['file_url'] ?? '', // Pastikan aman walau kosong/null
-      isBorrowed: false, // default
+      kategori: json['kategori'] ?? '',
+      deskripsi: json['deskripsi'] ?? '',
+      image: json['image'] ?? '',
+      file: json['file'] ?? '',
+      bahasa: json['bahasa'] ?? '',
+      penerbit: json['penerbit'] ?? '',
+      // 1. Gunakan key 'tanggal_rilis' yang benar (snake_case)
+      // 2. Parse string menjadi DateTime, tangani jika datanya null
+      tanggalRilis:
+          json['tanggal_rilis'] == null
+              ? null
+              : DateTime.parse(json['tanggal_rilis']),
+      halaman: json['halaman'] ?? '',
+      format: json['format'] ?? '',
+      isBorrowed: false,
     );
   }
 }

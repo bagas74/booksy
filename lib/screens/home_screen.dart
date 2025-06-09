@@ -15,7 +15,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final SupabaseClient _client = Supabase.instance.client;
 
   Future<List<Product>> fetchProductsByType(String type) async {
-    final response = await _client.from('books').select().eq('type', type);
+    final response = await _client.from('buku').select().eq('type', type);
 
     return (response as List).map((map) => Product.fromJson(map)).toList();
   }
@@ -185,7 +185,7 @@ class _HomeScreenState extends State<HomeScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                product.name,
+                product.judul,
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 14,

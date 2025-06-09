@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'dart:ui'; // Diperlukan lagi untuk ImageFilter.blur
+import 'dart:ui';
+import 'package:intl/intl.dart'; // Import package intl
 import '../../models/product.dart';
-import 'package:intl/intl.dart';
 
 class ProductDetail extends StatelessWidget {
   final Product product;
@@ -9,22 +9,27 @@ class ProductDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Tentukan warna tema gelap
+    const Color darkBackgroundColor = Color(0xFF1A1A1A);
+    const Color primaryTextColor = Colors.white;
+    const Color secondaryTextColor = Colors.grey;
+    final Color chipColor = Colors.grey.shade800;
+
     return Scaffold(
-      // Kita tidak menggunakan AppBar agar efek blur bisa sampai ke atas layar
+      backgroundColor: darkBackgroundColor, // Ganti warna background
       body: SafeArea(
-        top: false, // SafeArea tidak berlaku untuk bagian atas
+        top: false,
         child: Stack(
           children: [
             ListView(
-              padding: EdgeInsets.zero, // Hapus padding default ListView
+              padding: EdgeInsets.zero,
               children: [
-                // 1. Header dengan Gambar Latar Blur dan Cover di Tengah
+                // 1. Header dengan Gambar Latar Blur
                 Stack(
                   alignment: Alignment.center,
                   children: [
-                    // Gambar Latar yang di-blur
                     Container(
-                      height: MediaQuery.of(context).size.height * 0.3,
+                      height: MediaQuery.of(context).size.height * 0.4,
                       width: double.infinity,
                       child: ImageFiltered(
                         imageFilter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
@@ -33,19 +38,15 @@ class ProductDetail extends StatelessWidget {
                           fit: BoxFit.cover,
                           errorBuilder:
                               (context, error, stackTrace) =>
-                                  Container(color: Colors.grey),
+                                  Container(color: Colors.grey.shade800),
                         ),
                       ),
                     ),
-                    // Overlay untuk membuat teks lebih mudah dibaca
                     Positioned.fill(
-                      child: Container(color: Colors.black.withOpacity(0.1)),
+                      child: Container(color: Colors.black.withOpacity(0.2)),
                     ),
-                    // Cover Buku utama yang jelas (tidak di-blur)
                     Padding(
-                      padding: const EdgeInsets.only(
-                        top: 40.0,
-                      ), // Agar tidak terlalu ke atas
+                      padding: const EdgeInsets.only(top: 40.0),
                       child: Image.network(
                         product.image,
                         height: 200,
@@ -61,20 +62,19 @@ class ProductDetail extends StatelessWidget {
                   ],
                 ),
 
-                // 2. Konten Detail Buku di Bawah Gambar
+                // 2. Konten Detail Buku
                 Padding(
                   padding: const EdgeInsets.all(20.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Judul Buku
-                      // SESUDAH
                       Text(
                         product.judul,
-                        // textAlign: TextAlign.left, // Opsional, biasanya sudah default
                         style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
+                          color: primaryTextColor, // Ubah warna teks
                         ),
                       ),
                       const SizedBox(height: 24),
@@ -85,12 +85,19 @@ class ProductDetail extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
+                          color: primaryTextColor, // Ubah warna teks
                         ),
                       ),
                       const SizedBox(height: 8),
                       Chip(
-                        label: Text(product.kategori),
-                        backgroundColor: Colors.grey.shade200,
+                        label: Text(
+                          product.kategori,
+                          style: const TextStyle(
+                            color: primaryTextColor,
+                          ), // Ubah warna teks
+                        ),
+                        backgroundColor: chipColor, // Ubah warna chip
+                        side: BorderSide.none,
                       ),
                       const SizedBox(height: 24),
 
@@ -100,6 +107,7 @@ class ProductDetail extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
+                          color: primaryTextColor, // Ubah warna teks
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -107,27 +115,34 @@ class ProductDetail extends StatelessWidget {
                         product.deskripsi,
                         style: const TextStyle(
                           fontSize: 14,
-                          color: Colors.black54,
+                          color: secondaryTextColor, // Ubah warna teks
                         ),
                       ),
                       const SizedBox(height: 24),
 
-                      // Informasi Buku dari Database (Model)
+                      // Informasi Buku
                       const Text(
                         "Informasi Buku",
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
+                          color: primaryTextColor, // Ubah warna teks
                         ),
                       ),
                       const SizedBox(height: 16),
                       Table(
+                        // Perbaikan pada columnWidths
                         columnWidths: const {
                           5: IntrinsicColumnWidth(),
                           2: FlexColumnWidth(),
                         },
                         children: [
-                          _buildInfoTableRow("Bahasa", product.bahasa),
+                          _buildInfoTableRow(
+                            "Bahasa",
+                            product.bahasa,
+                            secondaryTextColor,
+                            primaryTextColor,
+                          ),
                           _buildInfoTableRow(
                             "Tanggal Rilis",
                             // Format DateTime menjadi String yang mudah dibaca
@@ -136,11 +151,33 @@ class ProductDetail extends StatelessWidget {
                                 : DateFormat(
                                   'dd MMM yyyy',
                                 ).format(product.tanggalRilis!),
+                            secondaryTextColor,
+                            primaryTextColor,
                           ),
-                          _buildInfoTableRow("Penerbit", product.penerbit),
-                          _buildInfoTableRow("Penulis", product.penulis),
-                          _buildInfoTableRow("Halaman", product.halaman),
-                          _buildInfoTableRow("Format", product.format),
+                          _buildInfoTableRow(
+                            "Penerbit",
+                            product.penerbit,
+                            secondaryTextColor,
+                            primaryTextColor,
+                          ),
+                          _buildInfoTableRow(
+                            "Penulis",
+                            product.penulis,
+                            secondaryTextColor,
+                            primaryTextColor,
+                          ),
+                          _buildInfoTableRow(
+                            "Halaman",
+                            product.halaman,
+                            secondaryTextColor,
+                            primaryTextColor,
+                          ),
+                          _buildInfoTableRow(
+                            "Format",
+                            product.format,
+                            secondaryTextColor,
+                            primaryTextColor,
+                          ),
                         ],
                       ),
                       const SizedBox(height: 40),
@@ -151,7 +188,12 @@ class ProductDetail extends StatelessWidget {
                           // Aksi ketika tombol pinjam ditekan
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF007BFF),
+                          backgroundColor: const Color.fromARGB(
+                            255,
+                            103,
+                            51,
+                            201,
+                          ),
                           minimumSize: const Size(double.infinity, 50),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -176,14 +218,12 @@ class ProductDetail extends StatelessWidget {
                 onTap: () => Navigator.pop(context),
                 child: Container(
                   padding: const EdgeInsets.all(8),
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(color: Colors.black26, blurRadius: 6),
-                    ],
+                    // Ubah warna container tombol kembali
+                    color: Colors.black.withOpacity(0.5),
                   ),
-                  child: const Icon(Icons.arrow_back, color: Colors.black),
+                  child: const Icon(Icons.arrow_back, color: Colors.white),
                 ),
               ),
             ),
@@ -193,17 +233,25 @@ class ProductDetail extends StatelessWidget {
     );
   }
 
-  // Helper widget untuk membuat baris pada tabel informasi
-  TableRow _buildInfoTableRow(String title, String value) {
+  // Helper widget diubah untuk menerima warna
+  TableRow _buildInfoTableRow(
+    String title,
+    String value,
+    Color titleColor,
+    Color valueColor,
+  ) {
     return TableRow(
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 4.0),
-          child: Text(title, style: const TextStyle(color: Colors.black54)),
+          child: Text(title, style: TextStyle(color: titleColor)),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 16.0),
-          child: Text(value),
+          child: Text(
+            value,
+            style: TextStyle(color: valueColor, fontWeight: FontWeight.bold),
+          ),
         ),
       ],
     );
