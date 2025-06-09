@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/product.dart';
 import '../widgets/bottom_nav_bar.dart';
-import 'product_detail.dart';
+import '../widgets/product_card.dart';
+import 'search_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -16,121 +17,95 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<List<Product>> fetchProductsByType(String type) async {
     final response = await _client.from('buku').select().eq('type', type);
-
+    if (response == null) {
+      throw Exception('Failed to load products');
+    }
     return (response as List).map((map) => Product.fromJson(map)).toList();
   }
 
   @override
   Widget build(BuildContext context) {
+    // 2. Mengubah warna background Scaffold menjadi abu-abu terang
     return Scaffold(
+      backgroundColor: Colors.grey[100],
       bottomNavigationBar: const BottomNavBar(currentIndex: 0),
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Colors.grey[50],
+        title: GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const SearchScreen()),
+            );
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(15),
+              border: Border.all(color: Colors.grey.shade300),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.search, color: Colors.grey[600]),
+                const SizedBox(width: 10),
+                Text(
+                  'Cari Buku atau Kategori',
+                  style: TextStyle(color: Colors.grey[600], fontSize: 16),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
-                  Text(
-                    "\u{1F4DA} Selamat Membaca di booksy",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  Icon(Icons.notifications_none),
-                ],
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                decoration: InputDecoration(
-                  hintText: 'Cari Buku',
-                  prefixIcon: Icon(Icons.search),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+              // Bagian header sekarang akan memiliki background abu-abu
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: const [
+                        Text(
+                          "\u{1F4DA} Selamat Membaca di booksy",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                          ),
+                        ),
+                        Icon(Icons.notifications_none),
+                      ],
+                    ),
+
+                    const SizedBox(height: 16),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.asset('assets/images/banner.jpg'),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 16),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.asset('assets/images/banner.jpg'),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
-                  Text(
-                    'Trending',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
 
-              /// FutureBuilder untuk Trending
-              FutureBuilder<List<Product>>(
-                future: fetchProductsByType('trending'),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const SizedBox(
-                      height: 280,
-                      child: Center(child: CircularProgressIndicator()),
-                    );
-                  } else if (snapshot.hasError) {
-                    return const Text('Gagal memuat data trending');
-                  }
-
-                  final products = snapshot.data ?? [];
-                  return SizedBox(
-                    height: 280,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      physics: const BouncingScrollPhysics(),
-                      children:
-                          products.map((p) => productCard(context, p)).toList(),
-                    ),
-                  );
-                },
+              // Bagian daftar buku
+              _buildProductSection(
+                context: context,
+                title: 'Trending',
+                fetcher: fetchProductsByType('trending'),
               ),
-
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
-                  Text(
-                    'Terbaru',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                ],
+              const SizedBox(height: 25),
+              _buildProductSection(
+                context: context,
+                title: 'Terbaru',
+                fetcher: fetchProductsByType('new'),
               ),
-              const SizedBox(height: 12),
-
-              /// FutureBuilder untuk New
-              FutureBuilder<List<Product>>(
-                future: fetchProductsByType('new'),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const SizedBox(
-                      height: 340,
-                      child: Center(child: CircularProgressIndicator()),
-                    );
-                  } else if (snapshot.hasError) {
-                    return const Text('Gagal memuat data terbaru');
-                  }
-
-                  final products = snapshot.data ?? [];
-                  return SizedBox(
-                    height: 340,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      physics: const BouncingScrollPhysics(),
-                      children:
-                          products.map((p) => productCard(context, p)).toList(),
-                    ),
-                  );
-                },
-              ),
+              const SizedBox(height: 20),
             ],
           ),
         ),
@@ -138,76 +113,62 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  /// Widget untuk menampilkan kartu produk
-  Widget productCard(BuildContext context, Product product) {
+  /// Helper widget untuk membuat section (Trending, Terbaru, dll)
+  Widget _buildProductSection({
+    required BuildContext context,
+    required String title,
+    required Future<List<Product>> fetcher,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => ProductDetail(product: product),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Text(
+            title,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+        ),
+        const SizedBox(height: 16),
+        FutureBuilder<List<Product>>(
+          future: fetcher,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const SizedBox(
+                height: 350, // Sesuaikan tinggi dengan kartu baru
+                child: Center(child: CircularProgressIndicator()),
+              );
+            } else if (snapshot.hasError) {
+              return SizedBox(
+                height: 350,
+                child: Center(
+                  child: Text('Gagal memuat data: ${snapshot.error}'),
+                ),
+              );
+            }
+
+            final products = snapshot.data ?? [];
+            if (products.isEmpty) {
+              return const SizedBox(
+                height: 350,
+                child: Center(child: Text('Tidak ada buku.')),
+              );
+            }
+
+            return SizedBox(
+              height: 350,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                // Beri padding kiri agar kartu pertama tidak menempel
+                padding: const EdgeInsets.only(left: 16),
+                itemCount: products.length,
+                itemBuilder: (context, index) {
+                  final product = products[index];
+                  return ProductCard(product: product);
+                },
               ),
             );
           },
-          child: Container(
-            width: 140,
-            height: 203,
-            margin: const EdgeInsets.only(right: 16),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 6,
-                  offset: Offset(0, 4),
-                ),
-              ],
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: Image.network(
-                product.image,
-                fit: BoxFit.cover,
-                errorBuilder:
-                    (context, error, stackTrace) =>
-                        const Icon(Icons.broken_image),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        SizedBox(
-          width: 140,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                product.judul,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              Text(
-                product.kategori,
-                style: const TextStyle(fontSize: 12, color: Colors.black54),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              Text(
-                product.penulis,
-                style: const TextStyle(fontSize: 12, color: Colors.black38),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 10),
-            ],
-          ),
         ),
       ],
     );
