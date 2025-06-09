@@ -15,23 +15,30 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final SupabaseClient _client = Supabase.instance.client;
 
+  /// Mengambil data produk dari Supabase berdasarkan tipe ('trending' atau 'new').
+  /// Sudah menggunakan try-catch untuk penanganan error yang benar.
   Future<List<Product>> fetchProductsByType(String type) async {
-    final response = await _client.from('buku').select().eq('type', type);
-    if (response == null) {
-      throw Exception('Failed to load products');
+    try {
+      final response = await _client.from('buku').select().eq('type', type);
+      return (response as List).map((map) => Product.fromJson(map)).toList();
+    } catch (error) {
+      // Menangkap error jika terjadi (misal: masalah jaringan atau query)
+      // dan melempar exception baru agar bisa ditangani di FutureBuilder.
+      debugPrint('Error fetching products: $error');
+      throw Exception('Gagal memuat data dari server');
     }
-    return (response as List).map((map) => Product.fromJson(map)).toList();
   }
 
   @override
   Widget build(BuildContext context) {
-    // 2. Mengubah warna background Scaffold menjadi abu-abu terang
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: Colors.grey[100], // Latar belakang abu-abu
       bottomNavigationBar: const BottomNavBar(currentIndex: 0),
+      // Menerapkan AppBar untuk Search Bar yang konsisten
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.grey[50],
+        toolbarHeight: 70, // Memberi ruang lebih untuk search bar
+        backgroundColor: Colors.grey[100],
         title: GestureDetector(
           onTap: () {
             Navigator.push(
@@ -40,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
             );
           },
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(15),
@@ -51,7 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Icon(Icons.search, color: Colors.grey[600]),
                 const SizedBox(width: 10),
                 Text(
-                  'Cari Buku atau Kategori',
+                  'Cari Buku atau Penulis',
                   style: TextStyle(color: Colors.grey[600], fontSize: 16),
                 ),
               ],
@@ -59,61 +66,60 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Bagian header sekarang akan memiliki background abu-abu
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: const [
-                        Text(
-                          "\u{1F4DA} Selamat Membaca di booksy",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                          ),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Bagian header (tanpa search bar, karena sudah di AppBar)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: const [
+                      Text(
+                        "\u{1F4DA} Selamat Membaca di booksy",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
                         ),
-                        Icon(Icons.notifications_none),
-                      ],
-                    ),
+                      ),
+                      Icon(Icons.notifications_none),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.asset('assets/images/banner.jpg'),
+                  ),
+                ],
+              ),
+            ),
 
-                    const SizedBox(height: 16),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.asset('assets/images/banner.jpg'),
-                    ),
-                  ],
-                ),
-              ),
+            // Bagian daftar buku "Trending"
+            _buildProductSection(
+              context: context,
+              title: 'Buku Terpopuler',
+              fetcher: fetchProductsByType('trending'),
+            ),
 
-              // Bagian daftar buku
-              _buildProductSection(
-                context: context,
-                title: 'Trending',
-                fetcher: fetchProductsByType('trending'),
-              ),
-              const SizedBox(height: 25),
-              _buildProductSection(
-                context: context,
-                title: 'Terbaru',
-                fetcher: fetchProductsByType('new'),
-              ),
-              const SizedBox(height: 20),
-            ],
-          ),
+            // Bagian daftar buku "Terbaru"
+            _buildProductSection(
+              context: context,
+              title: 'Buku Baru Dirilis',
+              fetcher: fetchProductsByType('new'),
+            ),
+            const SizedBox(height: 20),
+          ],
         ),
       ),
     );
   }
 
   /// Helper widget untuk membuat section (Trending, Terbaru, dll)
+  /// agar kode di dalam build method lebih bersih.
   Widget _buildProductSection({
     required BuildContext context,
     required String title,
@@ -123,27 +129,25 @@ class _HomeScreenState extends State<HomeScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 16.0),
           child: Text(
             title,
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
         ),
-        const SizedBox(height: 16),
         FutureBuilder<List<Product>>(
           future: fetcher,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const SizedBox(
-                height: 350, // Sesuaikan tinggi dengan kartu baru
+                height: 350,
                 child: Center(child: CircularProgressIndicator()),
               );
-            } else if (snapshot.hasError) {
+            }
+            if (snapshot.hasError) {
               return SizedBox(
                 height: 350,
-                child: Center(
-                  child: Text('Gagal memuat data: ${snapshot.error}'),
-                ),
+                child: Center(child: Text('Gagal memuat data')),
               );
             }
 
@@ -151,7 +155,7 @@ class _HomeScreenState extends State<HomeScreen> {
             if (products.isEmpty) {
               return const SizedBox(
                 height: 350,
-                child: Center(child: Text('Tidak ada buku.')),
+                child: Center(child: Text('Tidak ada buku untuk ditampilkan.')),
               );
             }
 
@@ -159,11 +163,11 @@ class _HomeScreenState extends State<HomeScreen> {
               height: 350,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
-                // Beri padding kiri agar kartu pertama tidak menempel
-                padding: const EdgeInsets.only(left: 16),
+                padding: const EdgeInsets.only(left: 16, right: 16),
                 itemCount: products.length,
                 itemBuilder: (context, index) {
                   final product = products[index];
+                  // Menggunakan ProductCard dari file terpisah
                   return ProductCard(product: product);
                 },
               ),

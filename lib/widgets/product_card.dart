@@ -92,7 +92,7 @@ class ProductCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          '${product.halaman} Hal.',
+                          '${product.halaman}.',
                           style: TextStyle(
                             fontSize: 12,
                             color: Colors.grey[600],
