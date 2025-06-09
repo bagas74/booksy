@@ -1,5 +1,5 @@
 // di file search_screen.dart
-
+import 'search_result_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -20,6 +20,19 @@ class _SearchScreenState extends State<SearchScreen> {
     'Marketing',
     'Atomic Habits',
   ];
+
+  // --- FUNGSI UNTUK MELAKUKAN PENCARIAN ---
+  void _performSearch(String query) {
+    if (query.isEmpty) return;
+
+    _addSearchTerm(query);
+
+    // Mengarahkan ke halaman hasil pencarian dengan query yang diinput
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => SearchResultScreen(query: query)),
+    );
+  }
 
   @override
   void initState() {
@@ -56,21 +69,6 @@ class _SearchScreenState extends State<SearchScreen> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('searchHistory');
     _loadSearchHistory(); // Muat ulang untuk update UI
-  }
-
-  // --- FUNGSI UNTUK MELAKUKAN PENCARIAN ---
-
-  void _performSearch(String query) {
-    if (query.isEmpty) return;
-
-    _addSearchTerm(query);
-    // Di sini Anda akan menavigasi ke halaman hasil pencarian
-    // atau memperbarui state di halaman ini untuk menampilkan hasil.
-    // Untuk contoh ini, kita hanya print.
-    print('Mencari untuk: $query');
-
-    // Contoh navigasi ke halaman hasil:
-    // Navigator.push(context, MaterialPageRoute(builder: (_) => SearchResultScreen(query: query)));
   }
 
   @override
