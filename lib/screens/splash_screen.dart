@@ -59,7 +59,7 @@ class _SplashScreenState extends State<SplashScreen> {
             const Text(
               'Booksy',
               style: TextStyle(
-                color: Color.fromRGBO(27, 133, 255, 1), // Warna teks putih
+                color: Color.fromRGBO(126, 87, 194, 1), // Warna teks putih
                 fontSize: 48, // Ukuran font besar
                 fontWeight: FontWeight.bold, // Teks tebal
                 // fontFamily: 'Montserrat', // Opsional: Gunakan custom font jika sudah ditambahkan di pubspec.yaml

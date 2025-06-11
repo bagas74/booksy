@@ -71,7 +71,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       // Mengubah warna latar belakang menjadi biru cerah
-      backgroundColor: const Color.fromRGBO(27, 133, 255, 1),
+      backgroundColor: const Color.fromRGBO(126, 87, 194, 1),
       body: Stack(
         children: [
           PageView.builder(
@@ -137,7 +137,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.white,
-                            foregroundColor: const Color.fromRGBO(27, 133, 255, 1), // Warna teks tombol dibuat biru
+                            foregroundColor: const Color.fromRGBO(127, 87, 194, 1), // Warna teks tombol dibuat biru
                             padding: const EdgeInsets.symmetric(vertical: 15),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
@@ -159,7 +159,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             );
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color.fromRGBO(27, 133, 255, 1), // Warna tombol dibuat biru
+                            backgroundColor: const Color.fromRGBO(127, 87, 194, 1), // Warna tombol dibuat biru
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 15),
                             shape: RoundedRectangleBorder(
@@ -179,7 +179,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     child: ElevatedButton(
                       onPressed: _nextPage,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromRGBO(27, 133, 255, 1), // Warna tombol dibuat biru
+                        backgroundColor: const Color.fromRGBO(127, 87, 194, 1), // Warna tombol dibuat biru
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 15),
                         shape: RoundedRectangleBorder(
