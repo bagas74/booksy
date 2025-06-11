@@ -1,5 +1,6 @@
 // lib/ui/splash_screen/splash_screen.dart
 
+import 'package:booksy/screens/onboarding_screen.dart';
 import 'package:flutter/material.dart';
 import 'dart:async'; // Diperlukan untuk Future.delayed
 
@@ -33,7 +34,7 @@ class _SplashScreenState extends State<SplashScreen> {
     // dengan tombol back.
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => const HomeScreen()),
+      MaterialPageRoute(builder: (context) => const OnboardingScreen()),
     );
   }
 

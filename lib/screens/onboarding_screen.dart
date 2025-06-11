@@ -16,7 +16,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
-  // Data untuk halaman-halaman onboarding menggunakan model
   final List<OnboardingItem> _onboardingItems = [
     OnboardingItem(
       imagePath: 'assets/images/onboarding_1.png',
@@ -54,16 +53,25 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   void _skipOnboarding() {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const HomeScreen()), // Navigasi ke HomeScreen
-    );
+    if (_currentPage < _onboardingItems.length - 1) {
+      _pageController.animateToPage(
+        _onboardingItems.length - 1,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeIn,
+      );
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blueGrey[900],
+      // Mengubah warna latar belakang menjadi biru cerah
+      backgroundColor: const Color.fromRGBO(27, 133, 255, 1),
       body: Stack(
         children: [
           PageView.builder(
@@ -76,7 +84,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             },
             itemBuilder: (context, index) {
               final item = _onboardingItems[index];
-              return OnboardingPageContent(item: item); // Gunakan widget konten yang reusable
+              // OnboardingPageContent tidak perlu diubah background colornya
+              // karena dia akan punya Container putih di bagian bawah
+              return OnboardingPageContent(item: item);
             },
           ),
           // Tombol "Lewati"
@@ -88,7 +98,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               child: const Text(
                 'Lewati',
                 style: TextStyle(
-                  color: Colors.white70,
+                  color: Colors.white, // Tetap putih agar terlihat di latar belakang biru
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
@@ -97,7 +107,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           ),
           // Indikator halaman (dots)
           Positioned(
-            bottom: MediaQuery.of(context).size.height * 0.35,
+            bottom: MediaQuery.of(context).size.height * 0.42,
             left: 0,
             right: 0,
             child: Row(
@@ -122,12 +132,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           onPressed: () {
                             Navigator.pushReplacement(
                               context,
-                              MaterialPageRoute(builder: (context) => const HomeScreen()), // Ganti ke RegisterScreen()
+                              MaterialPageRoute(builder: (context) => const HomeScreen()),
                             );
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.white,
-                            foregroundColor: Colors.blueGrey[900],
+                            foregroundColor: const Color.fromRGBO(27, 133, 255, 1), // Warna teks tombol dibuat biru
                             padding: const EdgeInsets.symmetric(vertical: 15),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
@@ -145,11 +155,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           onPressed: () {
                             Navigator.pushReplacement(
                               context,
-                              MaterialPageRoute(builder: (context) => const HomeScreen()), // Ganti ke LoginScreen()
+                              MaterialPageRoute(builder: (context) => const HomeScreen()),
                             );
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blueGrey[700],
+                            backgroundColor: const Color.fromRGBO(27, 133, 255, 1), // Warna tombol dibuat biru
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 15),
                             shape: RoundedRectangleBorder(
@@ -169,7 +179,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     child: ElevatedButton(
                       onPressed: _nextPage,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blueGrey[700],
+                        backgroundColor: const Color.fromRGBO(27, 133, 255, 1), // Warna tombol dibuat biru
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 15),
                         shape: RoundedRectangleBorder(
@@ -195,7 +205,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       height: 10,
       width: _currentPage == index ? 25 : 10,
       decoration: BoxDecoration(
-        color: _currentPage == index ? Colors.blueGrey[700] : Colors.white54,
+        color: _currentPage == index
+            ? Colors.white // Dot aktif putih di latar belakang biru
+            : Colors.white54, // Dot tidak aktif sedikit transparan putih
         borderRadius: BorderRadius.circular(5),
       ),
     );
