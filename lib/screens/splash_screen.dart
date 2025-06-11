@@ -2,11 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'dart:async'; // Diperlukan untuk Future.delayed
-
-// Asumsikan ini adalah halaman utama aplikasi kamu.
-// Pastikan path ini benar sesuai lokasi file home_page.dart kamu,
-// misal: lib/ui/home/home_page.dart
-import 'home_screen.dart';
+import 'onboarding_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -33,17 +29,23 @@ class _SplashScreenState extends State<SplashScreen> {
     // dengan tombol back.
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => const HomeScreen()),
+      MaterialPageRoute(builder: (context) => const OnboardingScreen()),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 252, 252, 252), // Warna latar belakang splash screen
+      backgroundColor: const Color.fromARGB(
+        255,
+        252,
+        252,
+        252,
+      ), // Warna latar belakang splash screen
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center, // Pusatkan konten secara vertikal
+          mainAxisAlignment:
+              MainAxisAlignment.center, // Pusatkan konten secara vertikal
           children: <Widget>[
             // Widget untuk menampilkan logo.
             // Pastikan kamu punya file gambar logo di 'assets/images/logo.png'
@@ -67,7 +69,9 @@ class _SplashScreenState extends State<SplashScreen> {
             const SizedBox(height: 30), // Spasi vertikal di bawah teks
             // Indikator loading (lingkaran berputar)
             const CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.white), // Warna indikator putih
+              valueColor: AlwaysStoppedAnimation<Color>(
+                Colors.white,
+              ), // Warna indikator putih
             ),
           ],
         ),
