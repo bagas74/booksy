@@ -40,6 +40,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       title: 'Booksy',
       theme: ThemeData(fontFamily: 'Poppins'),
+      debugShowCheckedModeBanner: false,
       home:
           _initialized
               ? const HomeScreen()

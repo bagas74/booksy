@@ -1,7 +1,7 @@
 class Product {
   final String judul;
   final String penulis;
-  final String kategori;
+  final List<String> kategori;
   final String deskripsi;
   final String bahasa;
   final DateTime? tanggalRilis; // Diubah menjadi DateTime dan boleh null
@@ -28,10 +28,15 @@ class Product {
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
+    final kategoriData = json['kategori'];
     return Product(
       judul: json['judul'] ?? '',
       penulis: json['penulis'] ?? '',
-      kategori: json['kategori'] ?? '',
+      kategori:
+          kategoriData is List
+              ? List<String>.from(kategoriData)
+              : [], // Jika data tidak ada, kembalikan list kosong
+
       deskripsi: json['deskripsi'] ?? '',
       image: json['image'] ?? '',
       file: json['file'] ?? '',

@@ -39,19 +39,26 @@ class ProductCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Gambar Cover Buku (tanpa perubahan)
-              SizedBox(
-                height: 200, // Beri tinggi tetap untuk gambar
-                width: double.infinity,
-                child: Image.network(
-                  product.image,
-                  fit: BoxFit.cover,
-                  errorBuilder:
-                      (context, error, stackTrace) => Center(
-                        child: Icon(
-                          Icons.broken_image,
-                          color: Colors.grey[400],
-                        ),
-                      ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Center(
+                  // 1. Bungkus widget Image.network dengan ClipRRect
+                  child: ClipRRect(
+                    // 2. Tentukan radius sudutnya. 20 sesuai permintaan Anda.
+                    borderRadius: BorderRadius.circular(15.0),
+                    child: Image.network(
+                      product.image,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      errorBuilder:
+                          (context, error, stackTrace) => Center(
+                            child: Icon(
+                              Icons.broken_image,
+                              color: Colors.grey[400],
+                            ),
+                          ),
+                    ),
+                  ),
                 ),
               ),
 

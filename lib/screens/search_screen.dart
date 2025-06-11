@@ -130,21 +130,25 @@ class _SearchScreenState extends State<SearchScreen> {
                 ),
               ],
             ),
-            Wrap(
-              spacing: 8.0,
-              children:
-                  _searchHistory
-                      .map(
-                        (term) => ActionChip(
-                          avatar: const Icon(Icons.history),
-                          label: Text(term),
-                          onPressed: () {
-                            _searchController.text = term;
-                            _performSearch(term);
-                          },
-                        ),
-                      )
-                      .toList(),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Wrap(
+                spacing: 8.0,
+                runSpacing: 8.0,
+                children:
+                    _searchHistory
+                        .map(
+                          (term) => ActionChip(
+                            avatar: const Icon(Icons.history),
+                            label: Text(term),
+                            onPressed: () {
+                              _searchController.text = term;
+                              _performSearch(term);
+                            },
+                          ),
+                        )
+                        .toList(),
+              ),
             ),
             const SizedBox(height: 24),
           ],
@@ -155,20 +159,28 @@ class _SearchScreenState extends State<SearchScreen> {
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
           const SizedBox(height: 8),
-          Wrap(
-            spacing: 8.0,
-            children:
-                _popularSearches
-                    .map(
-                      (term) => ActionChip(
-                        label: Text(term),
-                        onPressed: () {
-                          _searchController.text = term;
-                          _performSearch(term);
-                        },
-                      ),
-                    )
-                    .toList(),
+          // Bungkus widget Wrap Anda dengan Padding
+          Padding(
+            // EdgeInsets.symmetric(vertical: 8.0) akan memberi jarak 8 di atas DAN 8 di bawah blok chip.
+            // Anda bisa mengubah angkanya sesuai selera.
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: Wrap(
+              spacing: 8.0,
+              runSpacing:
+                  8.0, // Tambahkan runSpacing agar jarak antar baris juga bagus
+              children:
+                  _popularSearches
+                      .map(
+                        (term) => ActionChip(
+                          label: Text(term),
+                          onPressed: () {
+                            _searchController.text = term;
+                            _performSearch(term);
+                          },
+                        ),
+                      )
+                      .toList(),
+            ),
           ),
         ],
       ),

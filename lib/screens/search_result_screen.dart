@@ -85,10 +85,10 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
           return GridView.builder(
             padding: const EdgeInsets.all(16),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3, // Menampilkan 2 kartu per baris
+              crossAxisCount: 2, // Menampilkan 2 kartu per baris
               mainAxisSpacing: 16,
               crossAxisSpacing: 16,
-              childAspectRatio: 0.45, // Rasio agar kartu tidak terlalu pendek
+              childAspectRatio: 0.55, // Rasio agar kartu tidak terlalu pendek
             ),
             itemCount: products.length,
             itemBuilder: (context, index) {

@@ -39,7 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         elevation: 0,
         toolbarHeight: 70, // Memberi ruang lebih untuk search bar
-        backgroundColor: Colors.grey[100],
+        backgroundColor: AppColors.background,
         title: GestureDetector(
           onTap: () {
             Navigator.push(
