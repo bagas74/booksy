@@ -88,7 +88,7 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
               crossAxisCount: 2, // Menampilkan 2 kartu per baris
               mainAxisSpacing: 16,
               crossAxisSpacing: 16,
-              childAspectRatio: 0.55, // Rasio agar kartu tidak terlalu pendek
+              childAspectRatio: 0.49, // Rasio agar kartu tidak terlalu pendek
             ),
             itemCount: products.length,
             itemBuilder: (context, index) {
