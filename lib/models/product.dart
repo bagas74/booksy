@@ -1,4 +1,5 @@
 class Product {
+  final String id;
   final String judul;
   final String penulis;
   final List<String> kategori;
@@ -13,6 +14,7 @@ class Product {
   bool isBorrowed;
 
   Product({
+    required this.id,
     required this.judul,
     required this.penulis,
     required this.kategori,
@@ -30,13 +32,13 @@ class Product {
   factory Product.fromJson(Map<String, dynamic> json) {
     final kategoriData = json['kategori'];
     return Product(
+      id: json['id'],
       judul: json['judul'] ?? '',
       penulis: json['penulis'] ?? '',
       kategori:
           kategoriData is List
               ? List<String>.from(kategoriData)
               : [], // Jika data tidak ada, kembalikan list kosong
-
       deskripsi: json['deskripsi'] ?? '',
       image: json['image'] ?? '',
       file: json['file'] ?? '',

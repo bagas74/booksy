@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import '../screens/home_screen.dart';
 import '../screens/explore_screen.dart';
 import '../admin/screens/admin_home_screen.dart';
-// Import halaman lainnya saat sudah Anda buat
-// import '../screens/library_screen.dart';
+import '../screens/library_screen.dart';
 // import '../screens/profile_screen.dart';
 
 class BottomNavBar extends StatefulWidget {
@@ -24,7 +23,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
     final List<Widget? Function()> routes = [
       () => const HomeScreen(),
       () => const ExploreScreen(),
-      () => null, // TODO: Ganti dengan () => const LibraryScreen()
+      () => const LibraryScreen(),
       () => null, // TODO: Ganti dengan () => const ProfileScreen()
       () => const AdminHomeScreen(),
     ];

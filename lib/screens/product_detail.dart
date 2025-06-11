@@ -1,36 +1,115 @@
 import 'package:flutter/material.dart';
-import 'dart:ui'; // Diperlukan lagi untuk ImageFilter.blur
-import '../../models/product.dart';
+import 'dart:ui';
 import 'package:intl/intl.dart';
+import '../models/product.dart';
+import '../config/config.dart';
+import 'library_screen.dart';
+import '../services/product_detail_service.dart';
 
-class ProductDetail extends StatelessWidget {
+class ProductDetail extends StatefulWidget {
   final Product product;
   const ProductDetail({super.key, required this.product});
 
   @override
+  State<ProductDetail> createState() => _ProductDetailState();
+}
+
+class _ProductDetailState extends State<ProductDetail> {
+  final ProductDetailService _service = ProductDetailService();
+
+  bool _isAlreadyBorrowed = false;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkStatus();
+  }
+
+  Future<void> _checkStatus() async {
+    final status = await _service.isBookAlreadyBorrowed(widget.product.id);
+    if (mounted) {
+      setState(() {
+        _isAlreadyBorrowed = status;
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _handleBorrow() async {
+    final bool? didConfirm = await showDialog<bool>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            title: const Text('Konfirmasi Peminjaman'),
+            content: const Text(
+              'Buku ini akan dipinjam selama 30 hari. Lanjutkan?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Batal'),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Ya, Pinjam'),
+              ),
+            ],
+          ),
+    );
+
+    if (didConfirm == true) {
+      setState(() => _isLoading = true);
+      try {
+        // --- PERBAIKAN UTAMA DI SINI ---
+        // Kirim hanya ID buku, bukan seluruh objek
+        await _service.borrowBook(widget.product.id);
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Buku berhasil dipinjam!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          await _checkStatus();
+        }
+      } catch (error) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(error.toString()),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() => _isLoading = false);
+        }
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, // Atur background utama
+      backgroundColor: Colors.white,
       body: SafeArea(
-        top: false, // SafeArea tidak berlaku untuk bagian atas
+        top: false,
         child: Stack(
           children: [
-            // Konten utama yang bisa di-scroll
             ListView(
-              padding: EdgeInsets.zero, // Hapus padding default ListView
+              padding: EdgeInsets.zero,
               children: [
-                // 1. Header dengan Gambar Latar Blur dan Cover di Tengah
-                _buildHeader(context),
-
-                // 2. Konten Detail Buku di Bawah Gambar
-                // Konten ini sekarang dibungkus Container agar punya latar putih
-                // dan terpisah jelas dari header.
+                _buildBlurredHeader(context),
                 Container(
                   padding: const EdgeInsets.all(20.0),
-                  // Beri decoration agar bisa punya sudut tumpul di atas
                   decoration: const BoxDecoration(
                     color: Colors.white,
-                    // Sudut tumpul hanya di sisi atas kiri dan kanan
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(24),
                       topRight: Radius.circular(24),
@@ -39,17 +118,14 @@ class ProductDetail extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Judul Buku
                       Text(
-                        product.judul,
+                        widget.product.judul,
                         style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       const SizedBox(height: 24),
-
-                      // Kategori
                       const Text(
                         "Kategori",
                         style: TextStyle(
@@ -58,26 +134,20 @@ class ProductDetail extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      // Wrap untuk menampilkan banyak kategori
                       Wrap(
                         spacing: 8.0,
                         runSpacing: 4.0,
                         children:
-                            product.kategori.map((kategori) {
-                              return Chip(
-                                label: Text(kategori),
-                                backgroundColor: Colors.grey.shade200,
-                                materialTapTargetSize:
-                                    MaterialTapTargetSize.shrinkWrap,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8.0,
-                                ),
-                              );
-                            }).toList(),
+                            widget.product.kategori
+                                .map(
+                                  (kategori) => Chip(
+                                    label: Text(kategori),
+                                    backgroundColor: Colors.grey.shade200,
+                                  ),
+                                )
+                                .toList(),
                       ),
                       const SizedBox(height: 24),
-
-                      // Deskripsi
                       const Text(
                         "Deskripsi",
                         style: TextStyle(
@@ -87,17 +157,14 @@ class ProductDetail extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        product.deskripsi,
+                        widget.product.deskripsi,
                         style: const TextStyle(
                           fontSize: 14,
                           color: Colors.black54,
-                          height:
-                              1.5, // Beri jarak antar baris agar mudah dibaca
+                          height: 1.5,
                         ),
                       ),
                       const SizedBox(height: 24),
-
-                      // Informasi Buku
                       const Text(
                         "Informasi Buku",
                         style: TextStyle(
@@ -106,60 +173,37 @@ class ProductDetail extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      // Tabel Informasi dengan perbaikan
                       Table(
-                        // PERBAIKAN: Indeks kolom harus 0 dan 1
                         columnWidths: const {
                           0: IntrinsicColumnWidth(),
                           1: FlexColumnWidth(),
                         },
                         children: [
-                          _buildInfoTableRow("Bahasa", product.bahasa),
+                          _buildInfoTableRow("Bahasa", widget.product.bahasa),
                           _buildInfoTableRow(
                             "Tanggal Rilis",
-                            product.tanggalRilis == null
+                            widget.product.tanggalRilis == null
                                 ? '-'
                                 : DateFormat(
-                                  'dd MMM yyyy',
-                                ).format(product.tanggalRilis!),
+                                  'dd MMM yy',
+                                ).format(widget.product.tanggalRilis!),
                           ),
-                          _buildInfoTableRow("Penerbit", product.penerbit),
-                          _buildInfoTableRow("Penulis", product.penulis),
-                          _buildInfoTableRow("Halaman", product.halaman),
-                          _buildInfoTableRow("Format", product.format),
+                          _buildInfoTableRow(
+                            "Penerbit",
+                            widget.product.penerbit,
+                          ),
+                          _buildInfoTableRow("Penulis", widget.product.penulis),
+                          _buildInfoTableRow("Halaman", widget.product.halaman),
+                          _buildInfoTableRow("Format", widget.product.format),
                         ],
                       ),
                       const SizedBox(height: 40),
-
-                      // Tombol Aksi "Pinjam"
-                      ElevatedButton(
-                        onPressed: () {
-                          // Aksi ketika tombol pinjam ditekan
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color.fromARGB(
-                            255,
-                            141,
-                            18,
-                            172,
-                          ),
-                          minimumSize: const Size(double.infinity, 50),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: const Text(
-                          "Pinjam",
-                          style: TextStyle(color: Colors.white, fontSize: 16),
-                        ),
-                      ),
+                      _buildBorrowButton(),
                     ],
                   ),
                 ),
               ],
             ),
-
-            // Tombol Kembali (Back) di atas Stack
             _buildBackButton(context),
           ],
         ),
@@ -167,8 +211,57 @@ class ProductDetail extends StatelessWidget {
     );
   }
 
-  /// Helper widget untuk membangun header (dipisahkan agar lebih rapi)
-  Widget _buildHeader(BuildContext context) {
+  Widget _buildBorrowButton() {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (_isAlreadyBorrowed) {
+      return ElevatedButton.icon(
+        icon: const Icon(Icons.check_circle_outline, color: Colors.white),
+        label: const Text(
+          'Sudah Dipinjam',
+          style: TextStyle(color: Colors.white, fontSize: 16),
+        ),
+        onPressed: () {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Buku ini sudah ada di perpustakaan Anda.'),
+              action: SnackBarAction(
+                label: 'Lihat',
+                textColor: Colors.white,
+                onPressed:
+                    () => Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (_) => const LibraryScreen()),
+                    ),
+              ),
+            ),
+          );
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.grey.shade400,
+          minimumSize: const Size(double.infinity, 50),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      );
+    }
+    return ElevatedButton(
+      onPressed: _handleBorrow,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: AppColors.primary,
+        minimumSize: const Size(double.infinity, 50),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+      child: const Text(
+        "Pinjam Buku",
+        style: TextStyle(color: Colors.white, fontSize: 16),
+      ),
+    );
+  }
+
+  Widget _buildBlurredHeader(BuildContext context) {
     return Stack(
       alignment: Alignment.center,
       children: [
@@ -178,7 +271,7 @@ class ProductDetail extends StatelessWidget {
           child: ImageFiltered(
             imageFilter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
             child: Image.network(
-              product.image,
+              widget.product.image,
               fit: BoxFit.cover,
               errorBuilder:
                   (context, error, stackTrace) => Container(color: Colors.grey),
@@ -187,13 +280,11 @@ class ProductDetail extends StatelessWidget {
         ),
         Positioned.fill(child: Container(color: Colors.black.withOpacity(0.1))),
         Padding(
-          padding: const EdgeInsets.only(
-            bottom: 20.0,
-          ), // Beri jarak dari konten di bawah
+          padding: const EdgeInsets.only(bottom: 20.0),
           child: SizedBox(
             height: MediaQuery.of(context).size.height * 0.35,
             child: Image.network(
-              product.image,
+              widget.product.image,
               fit: BoxFit.contain,
               errorBuilder:
                   (context, error, stackTrace) => const Icon(
@@ -208,26 +299,27 @@ class ProductDetail extends StatelessWidget {
     );
   }
 
-  /// Helper widget untuk Tombol Kembali
   Widget _buildBackButton(BuildContext context) {
     return Positioned(
-      top: 50, // Disesuaikan agar lebih pas dengan status bar
+      top: 50,
       left: 16,
-      child: GestureDetector(
-        onTap: () => Navigator.pop(context),
-        child: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.black.withOpacity(0.4),
+      child: Material(
+        color: Colors.black.withOpacity(0.3),
+        shape: const CircleBorder(),
+        child: InkWell(
+          onTap: () => Navigator.pop(context),
+          customBorder: const CircleBorder(),
+          child: const Padding(
+            padding: EdgeInsets.all(8),
+            child: Icon(Icons.arrow_back, size: 24, color: Colors.white),
           ),
-          child: const Icon(Icons.arrow_back, color: Colors.white),
         ),
       ),
     );
   }
 
-  /// Helper widget untuk membuat baris pada tabel informasi
+  /// --- PERBAIKAN UTAMA DI SINI ---
+  /// Helper method ini sekarang diisi dengan benar, tidak lagi kosong.
   TableRow _buildInfoTableRow(String title, String value) {
     return TableRow(
       children: [
