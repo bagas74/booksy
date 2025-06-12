@@ -1,8 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import '../../models/product.dart';
-import '../../config/config.dart';
 
 class ReaderScreen extends StatefulWidget {
   final Product product;
@@ -13,87 +12,87 @@ class ReaderScreen extends StatefulWidget {
 }
 
 class _ReaderScreenState extends State<ReaderScreen> {
-  String? _pdfUrl;
-  bool _isLoading = true;
-  String? _errorMessage;
+  // State untuk menyimpan konten teks dari file
+  late Future<String> _textContentFuture;
 
   @override
   void initState() {
     super.initState();
-    _initializePdfUrl();
+    // Panggil fungsi untuk memuat konten teks saat halaman dibuka
+    _textContentFuture = _loadTextContent();
   }
 
-  void _initializePdfUrl() {
+  /// Mengambil konten file .txt dari Supabase Storage
+  Future<String> _loadTextContent() async {
     try {
-      // Kita akan coba bangun URL secara dinamis (Praktik Terbaik)
       final String fileName = widget.product.file;
       if (fileName.isEmpty) {
         throw Exception('Nama file kosong di database.');
       }
 
-      // --- PERBAIKAN DI SINI ---
-      // Nama bucket disesuaikan dengan screenshot Anda
-      const String pdfBucketName = 'filebooks';
+      const String textBucketName = 'filebooks'; // Sesuaikan nama bucket
 
-      final String publicUrl = Supabase.instance.client.storage
-          .from(pdfBucketName)
-          .getPublicUrl(fileName);
+      // Mengunduh file sebagai byte
+      final fileBytes = await Supabase.instance.client.storage
+          .from(textBucketName)
+          .download(fileName);
 
-      // --- BAGIAN DEBUGGING ---
-      // Ini akan mencetak URL lengkap ke konsol debug Anda
-      debugPrint('--- PDF URL DEBUG ---');
-      debugPrint('Nama File dari DB: $fileName');
-      debugPrint('URL yang Dibangun: $publicUrl');
-      debugPrint('---------------------');
-      // -----------------------
-
-      setState(() {
-        _pdfUrl = publicUrl;
-        _isLoading = false;
-      });
+      // Mengubah byte menjadi String (menggunakan UTF-8)
+      final String content = utf8.decode(fileBytes);
+      return content;
     } catch (error) {
-      setState(() {
-        _errorMessage = 'Gagal membuat URL: ${error.toString()}';
-        _isLoading = false;
-      });
+      debugPrint("Error loading text file: $error");
+      // Melempar error kembali agar bisa ditangkap oleh FutureBuilder
+      throw Exception('Gagal memuat konten buku.');
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.product.judul)),
-      body: Center(child: _buildPdfViewer()),
-    );
-  }
+      appBar: AppBar(
+        title: Text(widget.product.judul),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+      ),
+      body: FutureBuilder<String>(
+        future: _textContentFuture,
+        builder: (context, snapshot) {
+          // --- State Saat Loading ---
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          // --- State Saat Terjadi Error ---
+          if (snapshot.hasError) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  'Error: ${snapshot.error}',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.red),
+                ),
+              ),
+            );
+          }
 
-  Widget _buildPdfViewer() {
-    if (_isLoading) {
-      return const CircularProgressIndicator();
-    }
-    if (_errorMessage != null) {
-      // Tampilkan error dan URL yang gagal dimuat
-      return Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SelectableText(
-          'Error: $_errorMessage\n\nURL yang dicoba: $_pdfUrl',
-          textAlign: TextAlign.center,
-          style: const TextStyle(color: AppColors.error),
-        ),
-      );
-    }
-    if (_pdfUrl != null) {
-      return SfPdfViewer.network(
-        _pdfUrl!,
-        onDocumentLoadFailed: (details) {
-          setState(() {
-            _errorMessage =
-                'Gagal memuat PDF dari URL. Detail: ${details.error} - ${details.description}';
-          });
+          // --- State Jika Sukses ---
+          final textContent = snapshot.data ?? 'Konten tidak tersedia.';
+
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: SelectableText(
+              textContent,
+              style: const TextStyle(
+                fontSize: 16,
+                height: 1.5,
+                fontFamily: 'serif',
+              ),
+            ),
+          );
         },
-      );
-    }
-    return const Text('Terjadi kesalahan tidak terduga.');
+      ),
+    );
   }
 }
 
