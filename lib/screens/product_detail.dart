@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../models/product.dart';
 import '../config/config.dart';
 import 'library_screen.dart';
+import 'reader_screen.dart'; // -> Import halaman pembaca
 import '../services/product_detail_service.dart';
 
 class ProductDetail extends StatefulWidget {
@@ -64,15 +65,23 @@ class _ProductDetailState extends State<ProductDetail> {
     if (didConfirm == true) {
       setState(() => _isLoading = true);
       try {
-        // --- PERBAIKAN UTAMA DI SINI ---
-        // Kirim hanya ID buku, bukan seluruh objek
         await _service.borrowBook(widget.product.id);
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Buku berhasil dipinjam!'),
-              backgroundColor: Colors.green,
+            SnackBar(
+              content: const Text('Buku berhasil dipinjam!'),
+              backgroundColor: AppColors.success,
+              action: SnackBarAction(
+                label: 'Lihat',
+                textColor: Colors.white,
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (_) => const LibraryScreen()),
+                  );
+                },
+              ),
             ),
           );
           await _checkStatus();
@@ -82,7 +91,7 @@ class _ProductDetailState extends State<ProductDetail> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(error.toString()),
-              backgroundColor: Colors.red,
+              backgroundColor: AppColors.error,
             ),
           );
         }
@@ -211,35 +220,32 @@ class _ProductDetailState extends State<ProductDetail> {
     );
   }
 
+  /// --- PERBAIKAN UTAMA ADA DI SINI ---
+  /// Widget dinamis untuk menampilkan tombol
   Widget _buildBorrowButton() {
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
+
+    // JIKA BUKU SUDAH DIPINJAM: Tampilkan tombol "Baca Buku"
     if (_isAlreadyBorrowed) {
       return ElevatedButton.icon(
-        icon: const Icon(Icons.check_circle_outline, color: Colors.white),
+        icon: const Icon(Icons.menu_book, color: Colors.white),
         label: const Text(
-          'Sudah Dipinjam',
+          'Baca',
           style: TextStyle(color: Colors.white, fontSize: 16),
         ),
         onPressed: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('Buku ini sudah ada di perpustakaan Anda.'),
-              action: SnackBarAction(
-                label: 'Lihat',
-                textColor: Colors.white,
-                onPressed:
-                    () => Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (_) => const LibraryScreen()),
-                    ),
-              ),
+          // Navigasi ke halaman pembaca
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => ReaderScreen(product: widget.product),
             ),
           );
         },
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.grey.shade400,
+          backgroundColor: AppColors.success, // Gunakan warna hijau
           minimumSize: const Size(double.infinity, 50),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -247,6 +253,8 @@ class _ProductDetailState extends State<ProductDetail> {
         ),
       );
     }
+
+    // JIKA BELUM DIPINJAM: Tampilkan tombol "Pinjam Buku"
     return ElevatedButton(
       onPressed: _handleBorrow,
       style: ElevatedButton.styleFrom(
@@ -261,6 +269,7 @@ class _ProductDetailState extends State<ProductDetail> {
     );
   }
 
+  // --- Sisa Helper Widgets (tidak berubah) ---
   Widget _buildBlurredHeader(BuildContext context) {
     return Stack(
       alignment: Alignment.center,
@@ -318,8 +327,6 @@ class _ProductDetailState extends State<ProductDetail> {
     );
   }
 
-  /// --- PERBAIKAN UTAMA DI SINI ---
-  /// Helper method ini sekarang diisi dengan benar, tidak lagi kosong.
   TableRow _buildInfoTableRow(String title, String value) {
     return TableRow(
       children: [
