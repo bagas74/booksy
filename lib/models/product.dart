@@ -1,5 +1,6 @@
 class Product {
   final String id;
+  final DateTime createdAt;
   final String judul;
   final String penulis;
   final List<String> kategori;
@@ -12,9 +13,11 @@ class Product {
   final String file;
   final String format;
   bool isBorrowed;
+  final bool isRekomendasi;
 
   Product({
     required this.id,
+    required this.createdAt,
     required this.judul,
     required this.penulis,
     required this.kategori,
@@ -27,12 +30,14 @@ class Product {
     this.tanggalRilis, // Tidak wajib diisi
     required this.format,
     this.isBorrowed = false,
+    required this.isRekomendasi,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
     final kategoriData = json['kategori'];
     return Product(
       id: json['id'],
+      createdAt: DateTime.parse(json['created_at']),
       judul: json['judul'] ?? '',
       penulis: json['penulis'] ?? '',
       kategori:
@@ -53,6 +58,7 @@ class Product {
       halaman: json['halaman'] ?? '',
       format: json['format'] ?? '',
       isBorrowed: false,
+      isRekomendasi: json['is_rekomendasi'] ?? false,
     );
   }
 }

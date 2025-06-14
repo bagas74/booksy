@@ -16,29 +16,48 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final SupabaseClient _client = Supabase.instance.client;
 
-  /// Mengambil data produk dari Supabase berdasarkan tipe ('trending' atau 'new').
-  /// Sudah menggunakan try-catch untuk penanganan error yang benar.
+  /// Mengambil data produk dari Supabase.
+  /// Sekarang dengan penanganan error yang lebih baik.
   Future<List<Product>> fetchProductsByType(String type) async {
     try {
-      final response = await _client.from('buku').select().eq('type', type);
-      return (response as List).map((map) => Product.fromJson(map)).toList();
+      // Untuk buku populer, urutkan berdasarkan 'jumlah_dibaca'
+      if (type == 'trending') {
+        final response = await _client
+            .from('buku')
+            .select()
+            .order('jumlah_dibaca', ascending: false)
+            .limit(10);
+        return (response as List).map((map) => Product.fromJson(map)).toList();
+      }
+      // Untuk buku terbaru, urutkan berdasarkan 'created_at'
+      if (type == 'new') {
+        final response = await _client
+            .from('buku')
+            .select()
+            .order('created_at', ascending: false)
+            .limit(10);
+        return (response as List).map((map) => Product.fromJson(map)).toList();
+      }
+      return [];
+    } on PostgrestException catch (error) {
+      // Menangkap error spesifik dari Supabase untuk pesan yang lebih jelas
+      debugPrint('Supabase Error: ${error.message}');
+      throw Exception('Gagal memuat data: ${error.message}');
     } catch (error) {
-      // Menangkap error jika terjadi (misal: masalah jaringan atau query)
-      // dan melempar exception baru agar bisa ditangani di FutureBuilder.
-      debugPrint('Error fetching products: $error');
-      throw Exception('Gagal memuat data dari server');
+      // Menangkap error umum lainnya
+      debugPrint('Generic Error: $error');
+      throw Exception('Terjadi kesalahan tidak diketahui.');
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100], // Latar belakang abu-abu
+      backgroundColor: AppColors.background,
       bottomNavigationBar: const BottomNavBar(currentIndex: 0),
-      // Menerapkan AppBar untuk Search Bar yang konsisten
       appBar: AppBar(
         elevation: 0,
-        toolbarHeight: 70, // Memberi ruang lebih untuk search bar
+        toolbarHeight: 70,
         backgroundColor: AppColors.background,
         title: GestureDetector(
           onTap: () {
@@ -66,30 +85,28 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              print('Tombol notifikasi ditekan!');
+            },
+            icon: const Icon(
+              Icons.notifications_none,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Bagian header (tanpa search bar, karena sudah di AppBar)
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
-                      Text(
-                        "\u{1F4DA} Selamat Membaca di booksy",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
-                      ),
-                      Icon(Icons.notifications_none),
-                    ],
-                  ),
                   const SizedBox(height: 16),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(12),
@@ -99,14 +116,12 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
 
-            // Bagian daftar buku "Trending"
             _buildProductSection(
               context: context,
               title: 'Buku Terpopuler',
               fetcher: fetchProductsByType('trending'),
             ),
 
-            // Bagian daftar buku "Terbaru"
             _buildProductSection(
               context: context,
               title: 'Buku Baru Dirilis',
@@ -120,7 +135,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   /// Helper widget untuk membuat section (Trending, Terbaru, dll)
-  /// agar kode di dalam build method lebih bersih.
   Widget _buildProductSection({
     required BuildContext context,
     required String title,
@@ -148,10 +162,19 @@ class _HomeScreenState extends State<HomeScreen> {
             if (snapshot.hasError) {
               return SizedBox(
                 height: 350,
-                child: Center(child: Text('Gagal memuat data')),
+                // Sekarang menampilkan pesan error yang lebih spesifik
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    child: Text(
+                      snapshot.error.toString(),
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: AppColors.error),
+                    ),
+                  ),
+                ),
               );
             }
-
             final products = snapshot.data ?? [];
             if (products.isEmpty) {
               return const SizedBox(
@@ -159,7 +182,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Center(child: Text('Tidak ada buku untuk ditampilkan.')),
               );
             }
-
             return SizedBox(
               height: 350,
               child: ListView.builder(
@@ -168,7 +190,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 itemCount: products.length,
                 itemBuilder: (context, index) {
                   final product = products[index];
-                  // Menggunakan ProductCard dari file terpisah
                   return ProductCard(product: product);
                 },
               ),
