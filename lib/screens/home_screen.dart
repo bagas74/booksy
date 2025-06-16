@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/product.dart';
 import '../widgets/bottom_nav_bar.dart';
 import '../widgets/product_card.dart';
 import 'search_screen.dart';
 import '../config/config.dart';
+import '../services/home_service.dart'; // -> 1. Import service yang baru
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -14,41 +14,21 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final SupabaseClient _client = Supabase.instance.client;
+  // 2. Buat instance dari HomeService
+  final HomeService _homeService = HomeService();
 
-  /// Mengambil data produk dari Supabase.
-  /// Sekarang dengan penanganan error yang lebih baik.
-  Future<List<Product>> fetchProductsByType(String type) async {
-    try {
-      // Untuk buku populer, urutkan berdasarkan 'jumlah_dibaca'
-      if (type == 'trending') {
-        final response = await _client
-            .from('buku')
-            .select()
-            .order('jumlah_dibaca', ascending: false)
-            .limit(10);
-        return (response as List).map((map) => Product.fromJson(map)).toList();
-      }
-      // Untuk buku terbaru, urutkan berdasarkan 'created_at'
-      if (type == 'new') {
-        final response = await _client
-            .from('buku')
-            .select()
-            .order('created_at', ascending: false)
-            .limit(10);
-        return (response as List).map((map) => Product.fromJson(map)).toList();
-      }
-      return [];
-    } on PostgrestException catch (error) {
-      // Menangkap error spesifik dari Supabase untuk pesan yang lebih jelas
-      debugPrint('Supabase Error: ${error.message}');
-      throw Exception('Gagal memuat data: ${error.message}');
-    } catch (error) {
-      // Menangkap error umum lainnya
-      debugPrint('Generic Error: $error');
-      throw Exception('Terjadi kesalahan tidak diketahui.');
-    }
+  late Future<List<Product>> _popularBooksFuture;
+  late Future<List<Product>> _newBooksFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    // 3. Panggil method dari service yang baru saat halaman dibuka
+    _popularBooksFuture = _homeService.fetchPopularBooks();
+    _newBooksFuture = _homeService.fetchNewestBooks();
   }
+
+  // 4. --- FUNGSI fetchProductsByType() YANG LAMA SEKARANG DIHAPUS DARI SINI ---
 
   @override
   Widget build(BuildContext context) {
@@ -88,7 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           IconButton(
             onPressed: () {
-              print('Tombol notifikasi ditekan!');
+              // Aksi untuk tombol notifikasi
             },
             icon: const Icon(
               Icons.notifications_none,
@@ -116,16 +96,17 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
 
+            // Gunakan Future yang sudah diinisialisasi dari state
             _buildProductSection(
               context: context,
               title: 'Buku Terpopuler',
-              fetcher: fetchProductsByType('trending'),
+              fetcher: _popularBooksFuture,
             ),
 
             _buildProductSection(
               context: context,
               title: 'Buku Baru Dirilis',
-              fetcher: fetchProductsByType('new'),
+              fetcher: _newBooksFuture,
             ),
             const SizedBox(height: 20),
           ],
@@ -134,7 +115,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  /// Helper widget untuk membuat section (Trending, Terbaru, dll)
+  /// Helper widget untuk membuat section (Terpopuler, Terbaru, dll)
   Widget _buildProductSection({
     required BuildContext context,
     required String title,
@@ -162,7 +143,6 @@ class _HomeScreenState extends State<HomeScreen> {
             if (snapshot.hasError) {
               return SizedBox(
                 height: 350,
-                // Sekarang menampilkan pesan error yang lebih spesifik
                 child: Center(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24.0),

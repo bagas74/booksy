@@ -71,7 +71,7 @@ class ProductDetailService {
           .select()
           .not('id', 'eq', currentBookId) // Filter dulu
           .order('created_at', ascending: false) // Baru diurutkan
-          .limit(10); // Terakhir di-limit
+          .limit(5); // Terakhir di-limit
       return (response as List).map((map) => Product.fromJson(map)).toList();
     } catch (error) {
       debugPrint('Error fetching newest books: $error');

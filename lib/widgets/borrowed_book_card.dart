@@ -46,7 +46,10 @@ class BorrowedBookCard extends StatelessWidget {
                 // 2. Jalankan fungsi onReturn yang asli dari LibraryScreen
                 onReturn();
               },
-              child: const Text('Ya, Kembalikan'),
+              child: const Text(
+                'Ya, Kembalikan',
+                style: TextStyle(color: Colors.white),
+              ),
             ),
           ],
         );
