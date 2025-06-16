@@ -1,6 +1,5 @@
-import 'package:booksy/screens/login.dart';
+import 'package:booksy/screens/login_screen.dart';
 import 'package:flutter/material.dart';
-import 'screens/home_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -13,7 +12,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Booksy',
-      home: const Login(),
+      home: const LoginScreen(),
     );
   }
 }
