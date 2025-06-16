@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart'; // Anda perlu menambahkan package flutter_svg
 import '../config/config.dart'; // Menggunakan warna dari AppColors
 import '../screens/home_screen.dart'; // Halaman tujuan setelah login
 
@@ -66,7 +65,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   // Header dengan ilustrasi
                   Center(
                     // Anda bisa mengganti SvgPicture dengan Image.asset
-                    child: Image.asset('assets/'),
+                    child: Image.asset('assets/images/logobooksy.png'),
                   ),
                   const SizedBox(height: 30),
                   const Text(

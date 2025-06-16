@@ -1,3 +1,4 @@
+import 'package:booksy/screens/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'screens/home_screen.dart';
@@ -43,7 +44,7 @@ class _MyAppState extends State<MyApp> {
       debugShowCheckedModeBanner: false,
       home:
           _initialized
-              ? const HomeScreen()
+              ? const LoginScreen()
               : const Scaffold(
                 body: Center(child: CircularProgressIndicator()),
               ),
