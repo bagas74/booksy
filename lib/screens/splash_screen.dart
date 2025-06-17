@@ -1,6 +1,4 @@
 // lib/ui/splash_screen/splash_screen.dart
-
-import 'package:booksy/screens/onboarding_screen.dart';
 import 'package:flutter/material.dart';
 import 'dart:async'; // Diperlukan untuk Future.delayed
 import 'onboarding_screen.dart';

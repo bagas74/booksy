@@ -1,9 +1,9 @@
 // lib/screens/onboarding_screen.dart
-
-import 'package:booksy/models/onboarding_item.dart';
-import 'package:booksy/screens/home_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:booksy/screens/onboarding_page_content.dart';
+import 'package:booksy/models/onboarding_item.dart';
+import 'home_screen.dart';
+import 'onboarding_page_content.dart';
+import 'login_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -98,7 +98,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               child: const Text(
                 'Lewati',
                 style: TextStyle(
-                  color: Colors.white, // Tetap putih agar terlihat di latar belakang biru
+                  color:
+                      Colors
+                          .white, // Tetap putih agar terlihat di latar belakang biru
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
@@ -123,75 +125,95 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             bottom: 40,
             left: 20,
             right: 20,
-            child: _currentPage == _onboardingItems.length - 1
-                ? Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(builder: (context) => const HomeScreen()),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: const Color.fromRGBO(127, 87, 194, 1), // Warna teks tombol dibuat biru
-                            padding: const EdgeInsets.symmetric(vertical: 15),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+            child:
+                _currentPage == _onboardingItems.length - 1
+                    ? Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const LoginScreen(),
+                                ),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              foregroundColor: const Color.fromRGBO(
+                                127,
+                                87,
+                                194,
+                                1,
+                              ), // Warna teks tombol dibuat biru
+                              padding: const EdgeInsets.symmetric(vertical: 15),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            child: const Text(
+                              'Buat Akun',
+                              style: TextStyle(fontSize: 18),
                             ),
                           ),
-                          child: const Text(
-                            'Buat Akun',
-                            style: TextStyle(fontSize: 18),
-                          ),
                         ),
-                      ),
-                      const SizedBox(width: 15),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(builder: (context) => const HomeScreen()),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color.fromRGBO(127, 87, 194, 1), // Warna tombol dibuat biru
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 15),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                        const SizedBox(width: 15),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const LoginScreen(),
+                                ),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color.fromRGBO(
+                                127,
+                                87,
+                                194,
+                                1,
+                              ), // Warna tombol dibuat biru
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 15),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            child: const Text(
+                              'Masuk',
+                              style: TextStyle(fontSize: 18),
                             ),
                           ),
-                          child: const Text(
-                            'Masuk',
-                            style: TextStyle(fontSize: 18),
+                        ),
+                      ],
+                    )
+                    : SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: _nextPage,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color.fromRGBO(
+                            127,
+                            87,
+                            194,
+                            1,
+                          ), // Warna tombol dibuat biru
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
                           ),
                         ),
-                      ),
-                    ],
-                  )
-                : SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _nextPage,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromRGBO(127, 87, 194, 1), // Warna tombol dibuat biru
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 15),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                        child: const Text(
+                          'Selanjutnya',
+                          style: TextStyle(fontSize: 18),
                         ),
-                      ),
-                      child: const Text(
-                        'Selanjutnya',
-                        style: TextStyle(fontSize: 18),
                       ),
                     ),
-                  ),
           ),
         ],
       ),
@@ -205,9 +227,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       height: 10,
       width: _currentPage == index ? 25 : 10,
       decoration: BoxDecoration(
-        color: _currentPage == index
-            ? Colors.white // Dot aktif putih di latar belakang biru
-            : Colors.white54, // Dot tidak aktif sedikit transparan putih
+        color:
+            _currentPage == index
+                ? Colors
+                    .white // Dot aktif putih di latar belakang biru
+                : Colors.white54, // Dot tidak aktif sedikit transparan putih
         borderRadius: BorderRadius.circular(5),
       ),
     );
