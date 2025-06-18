@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
 import '../config/config.dart';
-import '../screens/home_screen.dart';
-import '../admin/screens/admin_home_screen.dart';
 import '../services/auth_service.dart';
-import 'signup_screen.dart';
+import 'login_screen.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class SignUpScreen extends StatefulWidget {
+  const SignUpScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<SignUpScreen> createState() => _SignUpScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _SignUpScreenState extends State<SignUpScreen> {
   final AuthService _authService = AuthService();
   final _formKey = GlobalKey<FormState>();
 
+  final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
@@ -24,74 +23,61 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   void dispose() {
+    _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
-  /// Menangani logika login dengan notifikasi sukses dan gagal
-  Future<void> _handleLogin() async {
+  /// Menangani logika pendaftaran (semua pendaftar otomatis menjadi 'user')
+  Future<void> _handleSignUp() async {
     if (!_formKey.currentState!.validate()) return;
     FocusScope.of(context).unfocus();
     setState(() => _isLoading = true);
 
     try {
-      final role = await _authService.signIn(
+      // Memanggil fungsi signUp yang sudah disederhanakan di service
+      await _authService.signUp(
+        fullName: _nameController.text.trim(),
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
 
-      // Jika login berhasil
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Login berhasil!'),
-            backgroundColor: AppColors.success,
-            behavior: SnackBarBehavior.floating,
-            margin: const EdgeInsets.all(12),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder:
+              (context) => AlertDialog(
+                title: const Text('Pendaftaran Berhasil'),
+                content: const Text(
+                  'Silakan cek email Anda untuk verifikasi, lalu masuk ke aplikasi.',
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(); // Tutup dialog
+                      // Arahkan kembali ke LoginScreen setelah pendaftaran sukses
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(builder: (_) => const LoginScreen()),
+                      );
+                    },
+                    child: const Text('OK'),
+                  ),
+                ],
+              ),
         );
-        // Beri jeda agar notifikasi terlihat sebelum pindah halaman
-        await Future.delayed(const Duration(milliseconds: 1500));
-      }
-
-      if (mounted) {
-        // Arahkan ke halaman yang sesuai berdasarkan role
-        if (role == 'admin') {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const AdminHomeScreen()),
-          );
-        } else {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const HomeScreen()),
-          );
-        }
       }
     } catch (e) {
-      // --- PERUBAHAN DI SINI: MENAMPILKAN PESAN ERROR YANG LEBIH BAIK ---
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            // Menggunakan pesan yang sudah Anda siapkan
-            content: const Text(
-              'Login gagal! Pastikan email dan password sudah benar.',
-            ),
+            content: Text(e.toString()),
             backgroundColor: AppColors.error,
-            behavior: SnackBarBehavior.floating,
-            margin: const EdgeInsets.all(12),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
           ),
         );
       }
     } finally {
-      // Pastikan loading berhenti apa pun hasilnya
       if (mounted) {
         setState(() => _isLoading = false);
       }
@@ -101,7 +87,14 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -111,16 +104,9 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 50),
-                  Center(
-                    child: Image.asset(
-                      'assets/images/logobooksy.png',
-                      height: 120,
-                    ),
-                  ),
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 20),
                   const Text(
-                    'Selamat Datang Kembali!',
+                    'Buat Akun Booksy',
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
@@ -129,7 +115,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    'Masuk untuk melanjutkan petualangan membacamu.',
+                    'Mulai petualangan membacamu bersama kami.',
                     style: TextStyle(
                       fontSize: 16,
                       color: AppColors.textSecondary,
@@ -137,7 +123,20 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 40),
 
-                  // Form Email
+                  // Form Nama Lengkap, Email, dan Password
+                  TextFormField(
+                    controller: _nameController,
+                    decoration: _buildInputDecoration(
+                      hint: 'Nama Lengkap',
+                      icon: Icons.person_outline,
+                    ),
+                    validator:
+                        (value) =>
+                            (value == null || value.trim().isEmpty)
+                                ? 'Nama tidak boleh kosong'
+                                : null,
+                  ),
+                  const SizedBox(height: 16),
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
@@ -149,12 +148,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         (value) =>
                             (value == null ||
                                     !RegExp(r'\S+@\S+\.\S+').hasMatch(value))
-                                ? 'Masukkan email yang valid'
+                                ? 'Masukkan format email yang valid'
                                 : null,
                   ),
                   const SizedBox(height: 16),
-
-                  // Form Password
                   TextFormField(
                     controller: _passwordController,
                     obscureText: _obscurePassword,
@@ -166,7 +163,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           _obscurePassword
                               ? Icons.visibility_off
                               : Icons.visibility,
-                          color: AppColors.textSecondary,
                         ),
                         onPressed:
                             () => setState(
@@ -176,17 +172,17 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     validator:
                         (value) =>
-                            (value == null || value.isEmpty)
-                                ? 'Kata sandi tidak boleh kosong'
+                            (value == null || value.length < 6)
+                                ? 'Kata sandi minimal 6 karakter'
                                 : null,
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 32),
 
-                  // Tombol Masuk
+                  // Pilihan role sudah dihapus dari UI
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: _isLoading ? null : _handleLogin,
+                      onPressed: _isLoading ? null : _handleSignUp,
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         backgroundColor: AppColors.primary,
@@ -198,11 +194,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                 width: 24,
                                 child: CircularProgressIndicator(
                                   color: Colors.white,
-                                  strokeWidth: 3,
                                 ),
                               )
                               : const Text(
-                                'Masuk',
+                                'Daftar',
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -213,24 +208,25 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 32),
 
-                  // Link ke Halaman Daftar
+                  // Link kembali ke Login
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Text(
-                        "Belum punya akun? ",
+                        "Sudah punya akun? ",
                         style: TextStyle(color: AppColors.textSecondary),
                       ),
                       GestureDetector(
-                        onTap:
-                            () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const SignUpScreen(),
-                              ),
+                        onTap: () {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const LoginScreen(),
                             ),
+                          );
+                        },
                         child: const Text(
-                          'Daftar Sekarang',
+                          'Masuk di sini',
                           style: TextStyle(
                             color: AppColors.primary,
                             fontWeight: FontWeight.bold,
@@ -258,7 +254,7 @@ class _LoginScreenState extends State<LoginScreen> {
       prefixIcon: Icon(icon, color: AppColors.textSecondary),
       suffixIcon: suffixIcon,
       filled: true,
-      fillColor: Colors.white,
+      fillColor: AppColors.surface,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: AppColors.border),

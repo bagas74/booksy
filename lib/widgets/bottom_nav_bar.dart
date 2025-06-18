@@ -3,7 +3,7 @@ import '../screens/home_screen.dart';
 import '../screens/explore_screen.dart';
 import '../admin/screens/admin_home_screen.dart';
 import '../screens/library_screen.dart';
-// import '../screens/profile_screen.dart';
+import '../screens/profile_screen.dart';
 
 class BottomNavBar extends StatefulWidget {
   final int currentIndex;
@@ -24,7 +24,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
       () => const HomeScreen(),
       () => const ExploreScreen(),
       () => const LibraryScreen(),
-      () => null, // TODO: Ganti dengan () => const ProfileScreen()
+      () => const ProfileScreen(),
       () => const AdminHomeScreen(),
     ];
 

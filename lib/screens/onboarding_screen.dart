@@ -4,6 +4,7 @@ import 'package:booksy/models/onboarding_item.dart';
 import 'home_screen.dart';
 import 'onboarding_page_content.dart';
 import 'login_screen.dart';
+import 'signup_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -136,7 +137,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                               Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => const LoginScreen(),
+                                  builder: (context) => const SignUpScreen(),
                                 ),
                               );
                             },

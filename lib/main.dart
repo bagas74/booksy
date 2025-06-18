@@ -3,6 +3,7 @@ import 'package:booksy/screens/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'config/config.dart';
+import 'screens/signup_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,7 +45,7 @@ class _MyAppState extends State<MyApp> {
       debugShowCheckedModeBanner: false,
       home:
           _initialized
-              ? const SplashScreen()
+              ? const HomeScreen()
               : const Scaffold(
                 body: Center(child: CircularProgressIndicator()),
               ),
