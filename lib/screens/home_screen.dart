@@ -87,10 +87,6 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    "\u{1F4DA} Selamat Membaca di booksy",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                  ),
                   const SizedBox(height: 16),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(12),
