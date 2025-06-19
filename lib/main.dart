@@ -45,7 +45,7 @@ class _MyAppState extends State<MyApp> {
       debugShowCheckedModeBanner: false,
       home:
           _initialized
-              ? const HomeScreen()
+              ? const SignUpScreen()
               : const Scaffold(
                 body: Center(child: CircularProgressIndicator()),
               ),
