@@ -21,7 +21,9 @@ class _AdminManageBooksScreenState extends State<AdminManageBooksScreen> {
   }
 
   void _loadBooks() {
-    _booksFuture = _adminService.fetchAllBooks();
+    setState(() {
+      _booksFuture = _adminService.fetchAllBooks();
+    });
   }
 
   Future<void> _toggleStatus(
@@ -35,10 +37,8 @@ class _AdminManageBooksScreenState extends State<AdminManageBooksScreen> {
         columnName: column,
         newStatus: !currentValue,
       );
-      // Refresh data setelah berhasil update
-      setState(() {
-        _loadBooks();
-      });
+      // Panggil _loadBooks untuk me-refresh data dari server
+      _loadBooks();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -75,11 +75,16 @@ class _AdminManageBooksScreenState extends State<AdminManageBooksScreen> {
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: DataTable(
+                headingTextStyle: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
                 columns: const [
                   DataColumn(label: Text('Judul Buku')),
                   DataColumn(label: Text('Penulis')),
                   DataColumn(label: Text('Rekomendasi')),
                   DataColumn(label: Text('Populer')),
+                  DataColumn(label: Text('Aksi')),
                 ],
                 rows:
                     books.map((book) {
@@ -100,10 +105,10 @@ class _AdminManageBooksScreenState extends State<AdminManageBooksScreen> {
                             ),
                           ),
                           DataCell(
+                            // --- PERBAIKAN DI SINI ---
+                            // Menggunakan nilai dari model yang sudah diperbarui
                             Switch(
-                              value:
-                                  book.isPopuler ??
-                                  false, // Asumsi ada kolom is_populer
+                              value: book.isPopuler ?? false,
                               onChanged:
                                   (value) => _toggleStatus(
                                     book,
@@ -111,6 +116,30 @@ class _AdminManageBooksScreenState extends State<AdminManageBooksScreen> {
                                     book.isPopuler ?? false,
                                   ),
                               activeColor: AppColors.primary,
+                            ),
+                          ),
+                          DataCell(
+                            Row(
+                              children: [
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.edit,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                  onPressed: () {
+                                    // TODO: Navigasi ke halaman edit buku
+                                  },
+                                ),
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.delete,
+                                    color: AppColors.error,
+                                  ),
+                                  onPressed: () {
+                                    // TODO: Tambahkan dialog konfirmasi dan logika hapus
+                                  },
+                                ),
+                              ],
                             ),
                           ),
                         ],
