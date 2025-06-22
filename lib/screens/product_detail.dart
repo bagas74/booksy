@@ -270,7 +270,7 @@ class _ProductDetailState extends State<ProductDetail> {
                       ),
 
                       // Padding bawah untuk memastikan konten terakhir tidak tertutup bottom bar
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 5),
                     ],
                   ),
                 ),
