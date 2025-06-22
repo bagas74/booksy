@@ -1,4 +1,8 @@
+// --- AWAL PERUBAHAN ---
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart'; // <-- Ditambahkan
+import 'package:cached_network_image/cached_network_image.dart'; // <-- Ditambahkan
+// --- AKHIR PERUBAHAN ---
 import '../config/config.dart';
 import '../screens/home_screen.dart';
 import '../admin/screens/admin_home_screen.dart';
@@ -22,6 +26,18 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _obscurePassword = true;
   bool _isLoading = false;
 
+  // --- AWAL PERUBAHAN ---
+  late Future<String>
+  _logoUrlFuture; // <-- Ditambahkan untuk menampung proses fetch
+
+  @override
+  void initState() {
+    super.initState();
+    // Memulai proses pengambilan URL logo saat halaman pertama kali dibuka
+    _logoUrlFuture = _getLogoUrl(); // <-- Ditambahkan
+  }
+  // --- AKHIR PERUBAHAN ---
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -29,8 +45,32 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  // --- AWAL PERUBAHAN ---
+  /// Mengambil URL logo dari tabel 'app_settings' di Supabase.
+  Future<String> _getLogoUrl() async {
+    try {
+      final supabase = Supabase.instance.client;
+      final response =
+          await supabase
+              .from('app_settings') // Nama tabel Anda
+              .select('setting_value') // Kolom yang berisi URL
+              .eq('setting_name', 'app_logo_url') // Kunci untuk logo
+              .single();
+
+      // Mengembalikan URL jika ada, atau string kosong jika tidak ditemukan
+      return response['setting_value'] as String? ?? '';
+    } catch (e) {
+      debugPrint('Error fetching logo URL: $e');
+      // Kembalikan string kosong jika terjadi error (misal: offline)
+      // Ini akan memicu fallback ke logo lokal di FutureBuilder
+      return '';
+    }
+  }
+  // --- AKHIR PERUBAHAN ---
+
   /// Menangani logika login dengan notifikasi sukses dan gagal
   Future<void> _handleLogin() async {
+    // ... Logika login Anda tidak berubah ...
     if (!_formKey.currentState!.validate()) return;
     FocusScope.of(context).unfocus();
     setState(() => _isLoading = true);
@@ -41,7 +81,6 @@ class _LoginScreenState extends State<LoginScreen> {
         password: _passwordController.text.trim(),
       );
 
-      // Jika login berhasil
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -54,12 +93,10 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
         );
-        // Beri jeda agar notifikasi terlihat sebelum pindah halaman
         await Future.delayed(const Duration(milliseconds: 1500));
       }
 
       if (mounted) {
-        // Arahkan ke halaman yang sesuai berdasarkan role
         if (role == 'admin') {
           Navigator.pushReplacement(
             context,
@@ -73,11 +110,9 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       }
     } catch (e) {
-      // --- PERUBAHAN DI SINI: MENAMPILKAN PESAN ERROR YANG LEBIH BAIK ---
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            // Menggunakan pesan yang sudah Anda siapkan
             content: const Text(
               'Login gagal! Pastikan email dan password sudah benar.',
             ),
@@ -91,7 +126,6 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
     } finally {
-      // Pastikan loading berhenti apa pun hasilnya
       if (mounted) {
         setState(() => _isLoading = false);
       }
@@ -112,12 +146,58 @@ class _LoginScreenState extends State<LoginScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 50),
+
+                  // --- AWAL PERUBAHAN ---
                   Center(
-                    child: Image.asset(
-                      'assets/images/logobooksy.png',
-                      height: 120,
+                    child: FutureBuilder<String>(
+                      future:
+                          _logoUrlFuture, // Menggunakan future yang sudah diinisiasi
+                      builder: (context, snapshot) {
+                        // 1. State: Sedang mengambil data
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const SizedBox(
+                            height: 120,
+                            width: 120,
+                            child: Center(child: CircularProgressIndicator()),
+                          );
+                        }
+
+                        // 2. State: Error atau tidak ada data/URL
+                        if (snapshot.hasError ||
+                            !snapshot.hasData ||
+                            snapshot.data!.isEmpty) {
+                          // Tampilkan logo lokal dari assets sebagai cadangan (fallback)
+                          return Image.asset(
+                            'assets/images/logobooksy.png',
+                            height: 120,
+                          );
+                        }
+
+                        // 3. State: Sukses, data URL tersedia
+                        final logoUrl = snapshot.data!;
+                        return CachedNetworkImage(
+                          imageUrl: logoUrl,
+                          height: 120,
+                          placeholder:
+                              (context, url) => const SizedBox(
+                                height: 120,
+                                width: 120,
+                                child: Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                              ),
+                          errorWidget:
+                              (context, url, error) => Image.asset(
+                                'assets/images/logobooksy.png', // Fallback jika URL error
+                                height: 120,
+                              ),
+                        );
+                      },
                     ),
                   ),
+
+                  // --- AKHIR PERUBAHAN ---
                   const SizedBox(height: 30),
                   const Text(
                     'Selamat Datang Kembali!',
@@ -137,7 +217,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 40),
 
-                  // Form Email
+                  // ... Sisa kode Anda (TextFormField, Button, dll) tetap sama ...
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
@@ -153,8 +233,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                 : null,
                   ),
                   const SizedBox(height: 16),
-
-                  // Form Password
                   TextFormField(
                     controller: _passwordController,
                     obscureText: _obscurePassword,
@@ -181,8 +259,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                 : null,
                   ),
                   const SizedBox(height: 24),
-
-                  // Tombol Masuk
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -212,8 +288,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   const SizedBox(height: 32),
-
-                  // Link ke Halaman Daftar
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -253,6 +327,7 @@ class _LoginScreenState extends State<LoginScreen> {
     required IconData icon,
     Widget? suffixIcon,
   }) {
+    // ... Fungsi ini tidak berubah ...
     return InputDecoration(
       hintText: hint,
       prefixIcon: Icon(icon, color: AppColors.textSecondary),

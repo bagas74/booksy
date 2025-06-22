@@ -1,6 +1,9 @@
 // lib/ui/splash_screen/splash_screen.dart
+
+import 'package:booksy/services/settings_service.dart'; // <-- 1. Import service baru
+import 'package:cached_network_image/cached_network_image.dart'; // <-- 2. Import untuk gambar dari network
 import 'package:flutter/material.dart';
-import 'dart:async'; // Diperlukan untuk Future.delayed
+import 'dart:async';
 import 'onboarding_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -11,66 +14,86 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  // <-- 3. Buat instance dari service dan state untuk future
+  final SettingsService _settingsService = SettingsService();
+  late Future<String> _logoUrlFuture;
+
   @override
   void initState() {
     super.initState();
-    // Panggil fungsi untuk navigasi setelah splash screen tampil
+    // Panggil fungsi untuk navigasi dan fetch logo
     _navigateToHome();
+    _logoUrlFuture =
+        _settingsService.getLogoUrl(); // <-- 4. Panggil fungsi dari service
   }
 
-  // Fungsi untuk menunda navigasi dan kemudian pindah ke halaman utama
   _navigateToHome() async {
-    // Menunggu selama 3 detik. Kamu bisa sesuaikan durasinya.
     await Future.delayed(const Duration(seconds: 3), () {});
-
-    // Navigasi ke HomePage setelah penundaan.
-    // pushReplacement digunakan agar pengguna tidak bisa kembali ke splash screen
-    // dengan tombol back.
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const OnboardingScreen()),
-    );
+    if (mounted) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const OnboardingScreen()),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(
-        255,
-        252,
-        252,
-        252,
-      ), // Warna latar belakang splash screen
+      backgroundColor: const Color.fromARGB(255, 252, 252, 252),
       body: Center(
         child: Column(
-          mainAxisAlignment:
-              MainAxisAlignment.center, // Pusatkan konten secara vertikal
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            // Widget untuk menampilkan logo.
-            // Pastikan kamu punya file gambar logo di 'assets/images/logo.png'
-            Image.asset(
-              'assets/images/logobooksy.png', // Sesuaikan path jika berbeda
-              width: 150, // Sesuaikan lebar logo
-              height: 150, // Sesuaikan tinggi logo
-              // fit: BoxFit.contain, // Opsional: cara gambar menyesuaikan diri
+            // --- AWAL PERUBAHAN LOGO ---
+            // Menggunakan FutureBuilder untuk menampilkan logo secara dinamis
+            FutureBuilder<String>(
+              future: _logoUrlFuture,
+              builder: (context, snapshot) {
+                // Saat data berhasil dimuat dan URL tidak kosong
+                if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                  return CachedNetworkImage(
+                    imageUrl: snapshot.data!,
+                    width: 150,
+                    height: 150,
+                    placeholder:
+                        (context, url) =>
+                            const SizedBox(width: 150, height: 150),
+                    errorWidget:
+                        (context, url, error) => Image.asset(
+                          'assets/images/logobooksy.png', // Fallback jika URL error
+                          width: 150,
+                          height: 150,
+                        ),
+                  );
+                }
+
+                // Saat loading atau jika terjadi error, tampilkan logo lokal
+                // Ini juga berfungsi sebagai fallback jika offline
+                return Image.asset(
+                  'assets/images/logobooksy.png',
+                  width: 150,
+                  height: 150,
+                );
+              },
             ),
-            const SizedBox(height: 20), // Spasi vertikal antara logo dan teks
-            // Teks nama aplikasi "Booksy"
+
+            // --- AKHIR PERUBAHAN LOGO ---
+            const SizedBox(height: 20),
             const Text(
               'Booksy',
               style: TextStyle(
-                color: Color.fromRGBO(126, 87, 194, 1), // Warna teks putih
-                fontSize: 48, // Ukuran font besar
-                fontWeight: FontWeight.bold, // Teks tebal
-                // fontFamily: 'Montserrat', // Opsional: Gunakan custom font jika sudah ditambahkan di pubspec.yaml
+                color: Color.fromRGBO(126, 87, 194, 1),
+                fontSize: 48,
+                fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 30), // Spasi vertikal di bawah teks
-            // Indikator loading (lingkaran berputar)
+            const SizedBox(height: 30),
             const CircularProgressIndicator(
+              // Ganti warna agar kontras dengan background
               valueColor: AlwaysStoppedAnimation<Color>(
-                Colors.white,
-              ), // Warna indikator putih
+                Color.fromRGBO(126, 87, 194, 0.8),
+              ),
             ),
           ],
         ),

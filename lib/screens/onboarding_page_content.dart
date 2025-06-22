@@ -1,15 +1,13 @@
 // lib/screens/onboarding_page_content.dart
 
+import 'package:cached_network_image/cached_network_image.dart'; // <-- 1. Import ditambahkan
 import 'package:flutter/material.dart';
 import 'package:booksy/models/onboarding_item.dart';
 
 class OnboardingPageContent extends StatelessWidget {
   final OnboardingItem item; // Menerima data melalui konstruktor
 
-  const OnboardingPageContent({
-    super.key,
-    required this.item,
-  });
+  const OnboardingPageContent({super.key, required this.item});
 
   @override
   Widget build(BuildContext context) {
@@ -21,18 +19,25 @@ class OnboardingPageContent extends StatelessWidget {
           child: Container(
             margin: const EdgeInsets.only(top: 80),
             padding: const EdgeInsets.all(20),
-            child: Image.asset(
-              item.imagePath, // Menggunakan data dari item
+            // --- AWAL PERUBAHAN ---
+            // Mengganti Image.asset dengan CachedNetworkImage
+            child: CachedNetworkImage(
+              imageUrl: item.imageUrl, // Menggunakan imageUrl dari item model
               fit: BoxFit.contain,
-              errorBuilder: (context, error, stackTrace) {
-                // Tampilkan ikon jika gambar tidak ditemukan (penting untuk placeholder)
-                return Icon(
-                  Icons.image,
-                  size: MediaQuery.of(context).size.width * 0.5,
-                  color: Colors.white38,
-                );
-              },
+              // Tampilkan indikator loading saat gambar sedang diunduh
+              placeholder:
+                  (context, url) => const Center(
+                    child: CircularProgressIndicator(color: Colors.white),
+                  ),
+              // Tampilkan ikon jika URL gambar error atau tidak bisa diakses
+              errorWidget:
+                  (context, url, error) => Icon(
+                    Icons.image,
+                    size: MediaQuery.of(context).size.width * 0.5,
+                    color: Colors.white38,
+                  ),
             ),
+            // --- AKHIR PERUBAHAN ---
           ),
         ),
         Expanded(
@@ -63,10 +68,7 @@ class OnboardingPageContent extends StatelessWidget {
                 Text(
                   item.description, // Menggunakan data dari item
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.blueGrey[700],
-                  ),
+                  style: TextStyle(fontSize: 16, color: Colors.blueGrey[700]),
                 ),
               ],
             ),
