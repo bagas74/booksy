@@ -14,6 +14,7 @@ class Product {
   final String format;
   bool isBorrowed;
   final bool isRekomendasi;
+  final bool? isPopuler;
 
   Product({
     required this.id,
@@ -31,6 +32,7 @@ class Product {
     required this.format,
     this.isBorrowed = false,
     required this.isRekomendasi,
+    required this.isPopuler,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -59,6 +61,7 @@ class Product {
       format: json['format'] ?? '',
       isBorrowed: false,
       isRekomendasi: json['is_rekomendasi'] ?? false,
+      isPopuler: json['is_populer'] ?? false,
     );
   }
 }

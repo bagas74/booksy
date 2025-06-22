@@ -7,20 +7,27 @@ import '../models/peminjaman.dart';
 class BorrowService {
   final SupabaseClient _client = Supabase.instance.client;
 
-  // NOTE: Di aplikasi nyata, UID akan didapat dari service otentikasi.
-  // Untuk sekarang, kita tetap menggunakan hardcoded UID.
-  final String _testUserId =
-      '8eaf2adb-8b22-4d3e-b205-d1d595d09234'; // GANTI DENGAN UID ANDA
+  // Variabel _testUserId sudah tidak diperlukan lagi dan dihapus.
 
-  /// Mengambil daftar peminjaman berdasarkan status.
+  /// Mengambil daftar peminjaman berdasarkan status untuk pengguna yang sedang login.
   Future<List<Peminjaman>> fetchBorrows({
     required bool isCurrentlyBorrowed,
   }) async {
+    // 1. Dapatkan pengguna yang sedang login saat ini.
+    final currentUser = _client.auth.currentUser;
+
+    // 2. Jika tidak ada pengguna yang login, kembalikan daftar kosong.
+    //    Ini mencegah error dan akan menampilkan halaman kosong di UI.
+    if (currentUser == null) {
+      return [];
+    }
+
     try {
       dynamic query = _client
           .from('peminjaman')
           .select('*, buku(*)')
-          .eq('user_id', _testUserId);
+          // 3. Gunakan ID pengguna yang sebenarnya dari currentUser.id
+          .eq('user_id', currentUser.id);
 
       if (isCurrentlyBorrowed) {
         query = query.filter('tanggal_kembali', 'is', null);
@@ -40,6 +47,7 @@ class BorrowService {
   }
 
   /// Mengupdate record peminjaman untuk mengembalikan buku.
+  /// Fungsi ini tidak perlu user_id, jadi tidak ada perubahan logika.
   Future<void> returnBook(String peminjamanId) async {
     try {
       await _client

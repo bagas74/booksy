@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:carousel_slider/carousel_slider.dart'; // <-- Perlu ditambahkan
+import 'package:cached_network_image/cached_network_image.dart'; // <-- Perlu ditambahkan
 import '../models/product.dart';
+import '../models/banner_model.dart'; // <-- Perlu ditambahkan
 import '../widgets/bottom_nav_bar.dart';
 import '../widgets/product_card.dart';
 import 'search_screen.dart';
 import '../config/config.dart';
-import '../services/home_service.dart'; // -> 1. Import service yang baru
+import '../services/home_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -14,21 +17,24 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // 2. Buat instance dari HomeService
   final HomeService _homeService = HomeService();
 
   late Future<List<Product>> _popularBooksFuture;
   late Future<List<Product>> _newBooksFuture;
+  // --- AWAL PENAMBAHAN UNTUK BANNER ---
+  late Future<List<BannerModel>> _bannersFuture;
+  int _currentBannerIndex = 0;
+  // --- AKHIR PENAMBAHAN UNTUK BANNER ---
 
   @override
   void initState() {
     super.initState();
-    // 3. Panggil method dari service yang baru saat halaman dibuka
     _popularBooksFuture = _homeService.fetchPopularBooks();
     _newBooksFuture = _homeService.fetchNewestBooks();
+    // --- AWAL PENAMBAHAN UNTUK BANNER ---
+    _bannersFuture = _homeService.fetchBanners();
+    // --- AKHIR PENAMBAHAN UNTUK BANNER ---
   }
-
-  // 4. --- FUNGSI fetchProductsByType() YANG LAMA SEKARANG DIHAPUS DARI SINI ---
 
   @override
   Widget build(BuildContext context) {
@@ -82,19 +88,10 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 16),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.asset('assets/images/banner.jpg'),
-                  ),
-                ],
-              ),
-            ),
+            // --- AWAL PERUBAHAN BAGIAN BANNER ---
+            // Padding dan Column yang lama dihapus dan diganti dengan widget baru ini
+            _buildBannerCarousel(),
+            // --- AKHIR PERUBAHAN BAGIAN BANNER ---
 
             // Gunakan Future yang sudah diinisialisasi dari state
             _buildProductSection(
@@ -114,6 +111,110 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+
+  // --- AWAL PENAMBAHAN WIDGET BARU UNTUK BANNER ---
+  Widget _buildBannerCarousel() {
+    return FutureBuilder<List<BannerModel>>(
+      future: _bannersFuture,
+      builder: (context, snapshot) {
+        // State saat data sedang dimuat
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return AspectRatio(
+            aspectRatio: 16 / 7.5,
+            child: Container(
+              margin: const EdgeInsets.fromLTRB(16, 32, 16, 16),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Center(child: CircularProgressIndicator()),
+            ),
+          );
+        }
+        // State jika terjadi error atau tidak ada banner di database
+        if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+          // Tampilkan banner statis lokal sebagai cadangan
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(16, 32, 16, 16),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.asset(''),
+            ),
+          );
+        }
+
+        // State jika data berhasil dimuat
+        final banners = snapshot.data!;
+        return Column(
+          children: [
+            const SizedBox(height: 16),
+            CarouselSlider.builder(
+              itemCount: banners.length,
+              itemBuilder: (context, index, realIndex) {
+                final banner = banners[index];
+                return GestureDetector(
+                  onTap: () {
+                    if (banner.targetUrl != null) {
+                      // Logika navigasi jika banner di-klik
+                      print('Banner diklik, navigasi ke: ${banner.targetUrl}');
+                    }
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 5.0),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12.0),
+                      child: CachedNetworkImage(
+                        imageUrl: banner.imageUrl,
+                        fit: BoxFit.cover,
+                        placeholder:
+                            (context, url) =>
+                                Container(color: Colors.grey.shade300),
+                        errorWidget:
+                            (context, url, error) => const Icon(Icons.error),
+                      ),
+                    ),
+                  ),
+                );
+              },
+              options: CarouselOptions(
+                autoPlay: true,
+                enlargeCenterPage: true,
+                aspectRatio: 16 / 7,
+                viewportFraction: 0.9,
+                onPageChanged: (index, reason) {
+                  setState(() {
+                    _currentBannerIndex = index;
+                  });
+                },
+              ),
+            ),
+            // Indicator dots
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children:
+                  banners.asMap().entries.map((entry) {
+                    return Container(
+                      width: 8.0,
+                      height: 8.0,
+                      margin: const EdgeInsets.symmetric(
+                        vertical: 10.0,
+                        horizontal: 4.0,
+                      ),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppColors.primary.withOpacity(
+                          _currentBannerIndex == entry.key ? 0.9 : 0.4,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+            ),
+          ],
+        );
+      },
+    );
+  }
+  // --- AKHIR PENAMBAHAN WIDGET BARU UNTUK BANNER ---
 
   /// Helper widget untuk membuat section (Terpopuler, Terbaru, dll)
   Widget _buildProductSection({

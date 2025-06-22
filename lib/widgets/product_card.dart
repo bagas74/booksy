@@ -40,12 +40,12 @@ class ProductCard extends StatelessWidget {
             children: [
               // Gambar Cover Buku (tanpa perubahan)
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(15.0),
                 child: Center(
                   // 1. Bungkus widget Image.network dengan ClipRRect
                   child: ClipRRect(
                     // 2. Tentukan radius sudutnya. 20 sesuai permintaan Anda.
-                    borderRadius: BorderRadius.circular(15.0),
+                    borderRadius: BorderRadius.circular(5.0),
                     child: Image.network(
                       product.image,
                       fit: BoxFit.cover,

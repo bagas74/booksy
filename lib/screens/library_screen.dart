@@ -124,7 +124,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                 ),
                 const SizedBox(height: 16),
                 const Text(
-                  'Tidak ada buku di bagian ini',
+                  'Tidak ada Riwayat',
                   style: TextStyle(
                     fontSize: 16,
                     color: AppColors.textSecondary,

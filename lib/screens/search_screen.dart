@@ -1,7 +1,6 @@
-// di file search_screen.dart
-import 'search_result_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'search_result_screen.dart'; // <- Pastikan import ini benar
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -13,6 +12,7 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController _searchController = TextEditingController();
   List<String> _searchHistory = [];
+
   final List<String> _popularSearches = [
     'Bumi',
     'Tere Liye',
@@ -21,26 +21,11 @@ class _SearchScreenState extends State<SearchScreen> {
     'Atomic Habits',
   ];
 
-  // --- FUNGSI UNTUK MELAKUKAN PENCARIAN ---
-  void _performSearch(String query) {
-    if (query.isEmpty) return;
-
-    _addSearchTerm(query);
-
-    // Mengarahkan ke halaman hasil pencarian dengan query yang diinput
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => SearchResultScreen(query: query)),
-    );
-  }
-
   @override
   void initState() {
     super.initState();
     _loadSearchHistory();
   }
-
-  // --- LOGIKA UNTUK RIWAYAT PENCARIAN ---
 
   Future<void> _loadSearchHistory() async {
     final prefs = await SharedPreferences.getInstance();
@@ -50,72 +35,80 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Future<void> _addSearchTerm(String term) async {
-    if (term.isEmpty) return;
+    if (term.trim().isEmpty) return;
+    final cleanTerm = term.trim();
 
     final prefs = await SharedPreferences.getInstance();
-    // Hapus dulu jika sudah ada agar pindah ke atas
-    _searchHistory.remove(term);
-    // Tambahkan di posisi paling awal
-    _searchHistory.insert(0, term);
-    // Batasi jumlah riwayat, misal 10
+    _searchHistory.remove(cleanTerm);
+    _searchHistory.insert(0, cleanTerm);
     if (_searchHistory.length > 10) {
       _searchHistory = _searchHistory.sublist(0, 10);
     }
     await prefs.setStringList('searchHistory', _searchHistory);
-    _loadSearchHistory(); // Muat ulang untuk update UI
+    _loadSearchHistory();
   }
 
   Future<void> _clearSearchHistory() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('searchHistory');
-    _loadSearchHistory(); // Muat ulang untuk update UI
+    _loadSearchHistory();
+  }
+
+  void _performSearch(String query) {
+    if (query.trim().isEmpty) return;
+    final cleanQuery = query.trim();
+
+    _addSearchTerm(cleanQuery);
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => SearchResultScreen(query: cleanQuery)),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // ... di dalam AppBar
         title: TextField(
           controller: _searchController,
           autofocus: true,
           decoration: InputDecoration(
             hintText: 'Cari judul atau penulis...',
-            // Border saat tidak di-klik
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(30.0),
-              borderSide: BorderSide(
-                color: Colors.grey.shade400, // Warna border saat normal
-                width: 1.0,
-              ),
+              borderSide: BorderSide(color: Colors.grey.shade300),
             ),
-            // Border saat di-klik (fokus)
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(30.0),
               borderSide: BorderSide(
-                color:
-                    Theme.of(
-                      context,
-                    ).primaryColor, // Warna border saat diklik (biru)
+                color: Theme.of(context).primaryColor,
                 width: 2.0,
               ),
             ),
-            // Mengatur padding agar teks tidak terlalu menempel ke border
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16.0,
               vertical: 8.0,
             ),
+            suffixIcon:
+                _searchController.text.isNotEmpty
+                    ? IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        setState(() {
+                          _searchController.clear();
+                        });
+                      },
+                    )
+                    : null,
           ),
-          onSubmitted: (value) {
-            _performSearch(value);
-          },
+          onChanged: (_) => setState(() {}), // update UI untuk suffixIcon
+          onSubmitted: _performSearch,
         ),
-        // ...
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          // --- BAGIAN RIWAYAT PENCARIAN ---
           if (_searchHistory.isNotEmpty) ...[
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -130,57 +123,42 @@ class _SearchScreenState extends State<SearchScreen> {
                 ),
               ],
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Wrap(
-                spacing: 8.0,
-                runSpacing: 8.0,
-                children:
-                    _searchHistory
-                        .map(
-                          (term) => ActionChip(
-                            avatar: const Icon(Icons.history),
-                            label: Text(term),
-                            onPressed: () {
-                              _searchController.text = term;
-                              _performSearch(term);
-                            },
-                          ),
-                        )
-                        .toList(),
-              ),
+            const SizedBox(height: 6), // jarak 6px
+            Wrap(
+              spacing: 8.0,
+              runSpacing: 4.0,
+              children:
+                  _searchHistory.map((term) {
+                    return ActionChip(
+                      avatar: const Icon(Icons.history, size: 16),
+                      label: Text(term),
+                      onPressed: () {
+                        _searchController.text = term;
+                        _performSearch(term);
+                      },
+                    );
+                  }).toList(),
             ),
-            const SizedBox(height: 24),
           ],
-
-          // --- BAGIAN PENCARIAN POPULER ---
+          if (_searchHistory.isNotEmpty) const SizedBox(height: 24),
           const Text(
             'Pencarian Populer',
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
-          const SizedBox(height: 8),
-          // Bungkus widget Wrap Anda dengan Padding
-          Padding(
-            // EdgeInsets.symmetric(vertical: 8.0) akan memberi jarak 8 di atas DAN 8 di bawah blok chip.
-            // Anda bisa mengubah angkanya sesuai selera.
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: Wrap(
-              spacing: 8.0,
-              runSpacing:
-                  8.0, // Tambahkan runSpacing agar jarak antar baris juga bagus
-              children:
-                  _popularSearches
-                      .map(
-                        (term) => ActionChip(
-                          label: Text(term),
-                          onPressed: () {
-                            _searchController.text = term;
-                            _performSearch(term);
-                          },
-                        ),
-                      )
-                      .toList(),
-            ),
+          const SizedBox(height: 6), // jarak 6px
+          Wrap(
+            spacing: 8.0,
+            runSpacing: 4.0,
+            children:
+                _popularSearches.map((term) {
+                  return ActionChip(
+                    label: Text(term),
+                    onPressed: () {
+                      _searchController.text = term;
+                      _performSearch(term);
+                    },
+                  );
+                }).toList(),
           ),
         ],
       ),
