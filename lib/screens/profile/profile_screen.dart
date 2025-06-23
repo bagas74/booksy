@@ -75,7 +75,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       bottomNavigationBar: const BottomNavBar(currentIndex: 3),
       appBar: AppBar(
-        title: const Text('Profil Saya'),
+        backgroundColor: AppColors.background,
+        title: const Text('Profil'),
         automaticallyImplyLeading: false,
       ),
       body: FutureBuilder<Profile>(

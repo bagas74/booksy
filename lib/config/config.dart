@@ -16,7 +16,7 @@ class AppColors {
   /// Used for buttons, active icons, and important elements.
   static const Color primary = Color.fromARGB(255, 120, 9, 172); // Classic Blue
   static const Color primaryLight = Color.fromARGB(255, 157, 15, 223);
-  static const Color background = Color(0xFFF8F9FA); // Very light grey
+  static const Color background = Colors.white; // Very light grey
   static const Color surface = Colors.white;
   static const Color border = Color(0xFFDEE2E6);
   static const Color textPrimary = Color(0xFF212529); // Almost black
