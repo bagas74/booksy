@@ -42,7 +42,10 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Booksy',
-      theme: ThemeData(fontFamily: 'Poppins'),
+      theme: ThemeData(
+        scaffoldBackgroundColor: AppColors.background,
+        fontFamily: 'Poppins',
+      ),
       debugShowCheckedModeBanner: false,
       home:
           _initialized

@@ -65,9 +65,11 @@ class _LibraryScreenState extends State<LibraryScreen> {
     return DefaultTabController(
       length: 2, // Kita punya 2 tab
       child: Scaffold(
+        backgroundColor: AppColors.background,
         // 2. KEMBALIKAN AppBar
         appBar: AppBar(
-          title: const Text('Perpustakaan Saya'),
+          backgroundColor: AppColors.background,
+          title: const Text('Perpustakaan'),
           bottom: const TabBar(
             indicatorColor: AppColors.primary,
             labelColor: AppColors.textPrimary,

@@ -59,9 +59,13 @@ class _BottomNavBarState extends State<BottomNavBar> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.15),
+            color: const Color.fromARGB(255, 95, 95, 95).withOpacity(0.15),
             spreadRadius: 1,
             blurRadius: 10,
+            offset: const Offset(
+              0,
+              -3,
+            ), // <-- TAMBAHKAN INI: Geser shadow 3 pixel ke atas
           ),
         ],
       ),
