@@ -49,7 +49,7 @@ class _MyAppState extends State<MyApp> {
       debugShowCheckedModeBanner: false,
       home:
           _initialized
-              ? const SplashScreen()
+              ? const AdminHomeScreen()
               : const Scaffold(
                 body: Center(child: CircularProgressIndicator()),
               ),
