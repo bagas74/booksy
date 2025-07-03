@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:booksy/models/kategori.dart';
+import 'package:booksy/services/supabase_service.dart';
 
 class KelolaKategoriScreen extends StatefulWidget {
   const KelolaKategoriScreen({super.key});
@@ -8,95 +10,98 @@ class KelolaKategoriScreen extends StatefulWidget {
 }
 
 class _KelolaKategoriScreenState extends State<KelolaKategoriScreen> {
-  List<String> daftarKategori = ['Fiksi', 'Non-Fiksi', 'Teknologi', 'Sejarah'];
+  final SupabaseService _service = SupabaseService();
+  List<Kategori> daftarKategori = [];
   String _cari = '';
+  bool isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchKategori();
+  }
+
+  Future<void> fetchKategori() async {
+    setState(() => isLoading = true);
+    try {
+      daftarKategori = await _service.fetchKategori();
+    } catch (e) {
+      print('Gagal ambil kategori: $e');
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Gagal memuat kategori")));
+    }
+    setState(() => isLoading = false);
+  }
 
   void _tambahKategori() {
-    String kategoriBaru = '';
+    final controller = TextEditingController();
+    bool isValid = false;
 
     showDialog(
       context: context,
       builder:
-          (context) => AlertDialog(
-            title: const Text("Tambah Kategori"),
-            content: TextField(
-              decoration: const InputDecoration(labelText: 'Nama Kategori'),
-              onChanged: (value) => kategoriBaru = value,
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text("Batal"),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  if (kategoriBaru.isNotEmpty) {
-                    setState(() {
-                      daftarKategori.add(kategoriBaru);
+          (_) => StatefulBuilder(
+            builder: (context, setStateDialog) {
+              return AlertDialog(
+                title: const Text("Tambah Kategori"),
+                content: TextField(
+                  controller: controller,
+                  autofocus: true,
+                  decoration: const InputDecoration(
+                    labelText: "Nama Kategori",
+                    border: OutlineInputBorder(),
+                  ),
+                  onChanged: (val) {
+                    setStateDialog(() {
+                      isValid = val.trim().isNotEmpty;
                     });
-                  }
-                  Navigator.pop(context);
-                },
-                child: const Text("Simpan"),
-              ),
-            ],
+                  },
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text("Batal"),
+                  ),
+                  ElevatedButton(
+                    onPressed:
+                        isValid
+                            ? () async {
+                              await _service.tambahKategori(
+                                controller.text.trim(),
+                              );
+                              Navigator.pop(context);
+                              fetchKategori();
+                            }
+                            : null,
+                    child: const Text("Simpan"),
+                  ),
+                ],
+              );
+            },
           ),
     );
   }
 
-  void _editKategori(int index) {
-    String kategoriEdit = daftarKategori[index];
-    final controller = TextEditingController(text: kategoriEdit);
-
+  void _hapusKategori(Kategori kategori) {
     showDialog(
       context: context,
       builder:
-          (context) => AlertDialog(
-            title: const Text("Edit Kategori"),
-            content: TextField(
-              controller: controller,
-              decoration: const InputDecoration(labelText: 'Nama Kategori'),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text("Batal"),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  if (controller.text.isNotEmpty) {
-                    setState(() {
-                      daftarKategori[index] = controller.text;
-                    });
-                  }
-                  Navigator.pop(context);
-                },
-                child: const Text("Simpan"),
-              ),
-            ],
-          ),
-    );
-  }
-
-  void _hapusKategori(int index) {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
+          (_) => AlertDialog(
             title: const Text("Hapus Kategori"),
-            content: const Text("Yakin ingin menghapus kategori ini?"),
+            content: Text('Yakin ingin menghapus "${kategori.nama}"?'),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
                 child: const Text("Batal"),
               ),
               ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    daftarKategori.removeAt(index);
-                  });
+                onPressed: () async {
+                  await _service.hapusKategori(kategori.id);
                   Navigator.pop(context);
+                  fetchKategori();
                 },
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                 child: const Text("Hapus"),
               ),
             ],
@@ -109,20 +114,14 @@ class _KelolaKategoriScreenState extends State<KelolaKategoriScreen> {
     final hasilFilter =
         daftarKategori
             .where(
-              (kategori) =>
-                  kategori.toLowerCase().contains(_cari.toLowerCase()),
+              (kat) => kat.nama.toLowerCase().contains(_cari.toLowerCase()),
             )
             .toList();
 
     return Scaffold(
-      backgroundColor: Colors.grey[200],
       appBar: AppBar(
         title: const Text("Kelola Kategori"),
-        backgroundColor: const Color.fromARGB(221, 205, 122, 236),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
+        backgroundColor: Colors.purple,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -138,7 +137,7 @@ class _KelolaKategoriScreenState extends State<KelolaKategoriScreen> {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              onChanged: (value) => setState(() => _cari = value),
+              onChanged: (val) => setState(() => _cari = val),
             ),
             const SizedBox(height: 12),
             Align(
@@ -163,15 +162,14 @@ class _KelolaKategoriScreenState extends State<KelolaKategoriScreen> {
             const SizedBox(height: 16),
             Expanded(
               child:
-                  hasilFilter.isEmpty
+                  isLoading
+                      ? const Center(child: CircularProgressIndicator())
+                      : hasilFilter.isEmpty
                       ? const Center(child: Text("Kategori tidak ditemukan."))
                       : ListView.builder(
                         itemCount: hasilFilter.length,
                         itemBuilder: (context, index) {
                           final kategori = hasilFilter[index];
-                          final originalIndex = daftarKategori.indexOf(
-                            kategori,
-                          );
                           return Card(
                             elevation: 3,
                             margin: const EdgeInsets.symmetric(vertical: 6),
@@ -180,31 +178,17 @@ class _KelolaKategoriScreenState extends State<KelolaKategoriScreen> {
                             ),
                             child: ListTile(
                               title: Text(
-                                kategori,
+                                kategori.nama,
                                 style: const TextStyle(
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  IconButton(
-                                    icon: const Icon(
-                                      Icons.edit,
-                                      color: Colors.blue,
-                                    ),
-                                    onPressed:
-                                        () => _editKategori(originalIndex),
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(
-                                      Icons.delete,
-                                      color: Colors.red,
-                                    ),
-                                    onPressed:
-                                        () => _hapusKategori(originalIndex),
-                                  ),
-                                ],
+                              trailing: IconButton(
+                                icon: const Icon(
+                                  Icons.delete,
+                                  color: Colors.red,
+                                ),
+                                onPressed: () => _hapusKategori(kategori),
                               ),
                             ),
                           );

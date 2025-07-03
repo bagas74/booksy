@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 class SupabaseConfig {
-  static const String supabaseUrl = 'https://eifwtejrfswcizdtihwl.supabase.co';
+  static const String supabaseUrl = 'https://niyetqitplleabgbvcsi.supabase.co';
   static const String supabaseAnonKey =
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpZnd0ZWpyZnN3Y2l6ZHRpaHdsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkwMjg1ODAsImV4cCI6MjA2NDYwNDU4MH0.A2bqQU3AgI6SrFvAVDPn_0GTRedE0LWdqRJyEEgHfr4';
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5peWV0cWl0cGxsZWFiZ2J2Y3NpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NjMwNTMsImV4cCI6MjA2NzAzOTA1M30.YIlTTXcgZutKmokew7RaLUaXKRqHINDd_DL4AYgJnt0';
 }
 
 class AppColors {

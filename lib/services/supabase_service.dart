@@ -18,7 +18,11 @@ class SupabaseService {
     await supabase.from('buku').insert({
       'judul': judul,
       'penulis': penulis,
-      'kategori_id': kategoriId,
+      'kategori_id': kategoriId, // Sudah int8, jadi aman
+      'cover': '',
+      'file_buku': '',
+      'is_populer': false,
+      'is_rekomendasi': false,
     });
   }
 
