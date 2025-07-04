@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../screens/login_screen.dart';
 import 'kelola_buku_screen.dart';
 import 'kelola_kategori_screen.dart';
 import 'kelola_pengguna_screen.dart';
@@ -12,6 +14,19 @@ class DashboardScreen extends StatelessWidget {
     final now = DateTime.now();
     final formatter = DateFormat('EEEE, d MMMM yyyy', 'id_ID');
     return formatter.format(now);
+  }
+
+  Future<void> _logout(BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear(); // Hapus data login
+
+    // Arahkan ke halaman login dan hapus semua halaman sebelumnya
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
+
+      (route) => false,
+    );
   }
 
   @override
@@ -40,7 +55,6 @@ class DashboardScreen extends StatelessWidget {
               ),
               const SizedBox(height: 20),
 
-              // 🔍 Search Field (placeholder, belum aktif)
               const TextField(
                 decoration: InputDecoration(
                   hintText: 'Cari buku...',
@@ -54,7 +68,6 @@ class DashboardScreen extends StatelessWidget {
               ),
               const SizedBox(height: 20),
 
-              // 📊 Stat Boxes
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: const [
@@ -71,7 +84,6 @@ class DashboardScreen extends StatelessWidget {
               ),
               const SizedBox(height: 10),
 
-              // 📂 Menu Tiles
               _AdminMenuTile(
                 icon: Icons.book,
                 label: "Kelola Buku",
@@ -124,8 +136,7 @@ class DashboardScreen extends StatelessWidget {
                 icon: Icons.logout,
                 label: "Keluar",
                 onTap: () {
-                  // TODO: Implement logout logic
-                  Navigator.pop(context);
+                  _logout(context); // Fungsi logout dipanggil di sini
                 },
               ),
               const SizedBox(height: 20),
