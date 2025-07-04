@@ -24,8 +24,30 @@ class DashboardScreen extends StatelessWidget {
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => const LoginScreen()),
-
       (route) => false,
+    );
+  }
+
+  void _showLogoutConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Konfirmasi Keluar"),
+        content: const Text("Apakah Anda yakin ingin keluar?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Batal"),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // Tutup dialog
+              _logout(context); // Panggil fungsi logout
+            },
+            child: const Text("Ya"),
+          ),
+        ],
+      ),
     );
   }
 
@@ -135,9 +157,7 @@ class DashboardScreen extends StatelessWidget {
               _AdminMenuTile(
                 icon: Icons.logout,
                 label: "Keluar",
-                onTap: () {
-                  _logout(context); // Fungsi logout dipanggil di sini
-                },
+                onTap: () => _showLogoutConfirmation(context),
               ),
               const SizedBox(height: 20),
             ],
