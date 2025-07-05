@@ -8,7 +8,7 @@ class Product {
   final String bahasa;
   final DateTime? tanggalRilis; // Diubah menjadi DateTime dan boleh null
   final String penerbit;
-  final String halaman;
+  final int halaman;
   final String image;
   final String file;
   final String format;
@@ -57,7 +57,7 @@ class Product {
           json['tanggal_rilis'] == null
               ? null
               : DateTime.parse(json['tanggal_rilis']),
-      halaman: json['halaman'] ?? '',
+      halaman: json['halaman'] as int? ?? 0,
       format: json['format'] ?? '',
       isBorrowed: false,
       isRekomendasi: json['is_rekomendasi'] ?? false,

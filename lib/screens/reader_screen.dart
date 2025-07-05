@@ -30,7 +30,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
         throw Exception('Nama file kosong di database.');
       }
 
-      const String textBucketName = 'filebooks'; // Sesuaikan nama bucket
+      const String textBucketName = 'files'; // Sesuaikan nama bucket
 
       // Mengunduh file sebagai byte
       final fileBytes = await Supabase.instance.client.storage

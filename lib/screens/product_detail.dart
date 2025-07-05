@@ -245,8 +245,9 @@ class _ProductDetailState extends State<ProductDetail> {
                                 ),
                                 _buildInfoTableRow(
                                   "Halaman",
-                                  widget.product.halaman,
+                                  widget.product.halaman.toString(),
                                 ),
+
                                 _buildInfoTableRow(
                                   "Format",
                                   widget.product.format,

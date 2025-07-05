@@ -2,10 +2,7 @@
 
 import 'package:booksy/models/onboarding_item.dart';
 import 'package:booksy/services/onboarding_service.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-
-import 'home_screen.dart'; // Walaupun tidak digunakan langsung, baik untuk referensi
 import 'onboarding_page_content.dart';
 import 'login_screen.dart';
 import 'signup_screen.dart';
