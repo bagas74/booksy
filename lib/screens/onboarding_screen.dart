@@ -1,11 +1,7 @@
 // lib/screens/onboarding_screen.dart
 
 import 'package:booksy/models/onboarding_item.dart';
-import 'package:booksy/services/onboarding_service.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-
-import 'home_screen.dart'; // Walaupun tidak digunakan langsung, baik untuk referensi
 import 'onboarding_page_content.dart';
 import 'login_screen.dart';
 import 'signup_screen.dart';
@@ -18,17 +14,32 @@ class OnboardingScreen extends StatefulWidget {
 }
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
-  final OnboardingService _onboardingService = OnboardingService();
-  late Future<List<OnboardingItem>> _onboardingFuture;
-
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
-  @override
-  void initState() {
-    super.initState();
-    _onboardingFuture = _onboardingService.fetchOnboardingItems();
-  }
+  // --- PERUBAHAN 1: Data Lokal (Hardcoded) ---
+  // Teks didefinisikan di sini karena database tidak aktif.
+  // 'imageUrl' dikosongkan karena logika gambar ditangani oleh index di halaman konten.
+  final List<OnboardingItem> _onboardingItems = [
+    OnboardingItem(
+      title: 'Selamat Datang di Booksy!',
+      description:
+          'Temukan dan pinjam buku favoritmu dengan mudah. Jelajahi berbagai genre dan penulis.',
+      imageUrl: 'assets/images/onboarding2.png',
+    ),
+    OnboardingItem(
+      title: 'Peminjaman Praktis',
+      description:
+          'Pinjam buku kapan saja, di mana saja. Catat semua peminjaman dan pengembalianmu.',
+      imageUrl: 'assets/images/onboarding3.png',
+    ),
+    OnboardingItem(
+      title: 'Kelola Koleksimu',
+      description:
+          'Tambahkan buku baru ke koleksi, update status, dan buat daftar bacaanmu sendiri.',
+      imageUrl: 'assets/images/onboarding4.png',
+    ),
+  ];
 
   @override
   void dispose() {
@@ -40,32 +51,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color.fromRGBO(126, 87, 194, 1),
-      body: FutureBuilder<List<OnboardingItem>>(
-        future: _onboardingFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(color: Colors.white),
-            );
-          }
-
-          if (snapshot.hasError) {
-            return Center(
-              child: Text(
-                'Error: ${snapshot.error}',
-                style: const TextStyle(color: Colors.white),
-              ),
-            );
-          }
-
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const LoginScreen();
-          }
-
-          final onboardingItems = snapshot.data!;
-          return buildOnboardingUI(onboardingItems);
-        },
-      ),
+      // --- PERUBAHAN 2: Hapus FutureBuilder ---
+      // Langsung panggil fungsi build UI dengan data lokal
+      body: buildOnboardingUI(_onboardingItems),
     );
   }
 
@@ -98,26 +86,39 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           },
           itemBuilder: (context, index) {
             final item = items[index];
-            return OnboardingPageContent(item: item);
+            // --- PERUBAHAN 3: Kirim parameter index ---
+            // Penting agar OnboardingPageContent tahu harus memuat assets/images/onboarding(index+1).png
+            return OnboardingPageContent(item: item, index: index);
           },
         ),
+
+        // Tombol Skip (Lewati)
         Positioned(
-          top: 40,
+          top: 50,
           right: 20,
           child: GestureDetector(
             onTap: skipOnboarding,
-            child: const Text(
-              'Lewati',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                color: Colors.white.withOpacity(0.2),
+              ),
+              child: const Text(
+                'Lewati',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),
         ),
+
+        // Indikator Dot (Titik-titik)
         Positioned(
-          bottom: MediaQuery.of(context).size.height * 0.42,
+          bottom: MediaQuery.of(context).size.height * 0.45,
           left: 0,
           right: 0,
           child: Row(
@@ -128,13 +129,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ),
           ),
         ),
+
+        // Tombol Bawah (Login/Signup/Next)
         Positioned(
           bottom: 40,
           left: 20,
           right: 20,
           child:
               _currentPage == items.length - 1
-                  // --- AWAL PERBAIKAN TOMBOL ---
                   ? Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -163,7 +165,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           ),
                           child: const Text(
                             'Buat Akun',
-                            style: TextStyle(fontSize: 18),
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
@@ -191,13 +196,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                               side: const BorderSide(
                                 color: Colors.white,
                                 width: 2,
-                              ), // Tambahkan border putih
+                              ),
                               borderRadius: BorderRadius.circular(10),
                             ),
                           ),
                           child: const Text(
                             'Masuk',
-                            style: TextStyle(fontSize: 18),
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
@@ -212,10 +220,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 15),
                         shape: RoundedRectangleBorder(
-                          side: const BorderSide(
-                            color: Colors.white,
-                            width: 2,
-                          ), // Tambahkan border putih
+                          side: const BorderSide(color: Colors.white, width: 2),
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
@@ -225,13 +230,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       ),
                     ),
                   ),
-          // --- AKHIR PERBAIKAN TOMBOL ---
         ),
       ],
     );
   }
 
-  // --- AWAL PERBAIKAN FUNGSI DOT ---
   Widget _buildDot(int index, BuildContext context) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
@@ -239,11 +242,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       height: 10,
       width: _currentPage == index ? 25 : 10,
       decoration: BoxDecoration(
-        color: _currentPage == index ? Colors.white : Colors.white54,
+        color: _currentPage == index ? Colors.white : Colors.white38,
         borderRadius: BorderRadius.circular(5),
       ),
     );
   }
-
-  // --- AKHIR PERBAIKAN FUNGSI DOT ---
 }

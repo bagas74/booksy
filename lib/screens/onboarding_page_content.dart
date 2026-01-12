@@ -1,13 +1,17 @@
 // lib/screens/onboarding_page_content.dart
 
-import 'package:cached_network_image/cached_network_image.dart'; // <-- 1. Import ditambahkan
 import 'package:flutter/material.dart';
 import 'package:booksy/models/onboarding_item.dart';
 
 class OnboardingPageContent extends StatelessWidget {
-  final OnboardingItem item; // Menerima data melalui konstruktor
+  final OnboardingItem item;
+  final int index;
 
-  const OnboardingPageContent({super.key, required this.item});
+  const OnboardingPageContent({
+    super.key,
+    required this.item,
+    required this.index,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -19,27 +23,25 @@ class OnboardingPageContent extends StatelessWidget {
           child: Container(
             margin: const EdgeInsets.only(top: 80),
             padding: const EdgeInsets.all(20),
-            // --- AWAL PERUBAHAN ---
-            // Mengganti Image.asset dengan CachedNetworkImage
-            child: CachedNetworkImage(
-              imageUrl: item.imageUrl, // Menggunakan imageUrl dari item model
+            // --- PERBAIKAN: Gunakan item.imageUrl ---
+            child: Image.asset(
+              item.imageUrl, // Mengambil path yang benar dari OnboardingScreen
               fit: BoxFit.contain,
-              // Tampilkan indikator loading saat gambar sedang diunduh
-              placeholder:
-                  (context, url) => const Center(
-                    child: CircularProgressIndicator(color: Colors.white),
-                  ),
-              // Tampilkan ikon jika URL gambar error atau tidak bisa diakses
-              errorWidget:
-                  (context, url, error) => Icon(
-                    Icons.image,
-                    size: MediaQuery.of(context).size.width * 0.5,
-                    color: Colors.white38,
-                  ),
+              errorBuilder: (context, error, stackTrace) {
+                // Debugging: Print error ke console agar tahu kenapa gagal
+                debugPrint("Gagal memuat gambar: ${item.imageUrl} -> $error");
+
+                return const Icon(
+                  Icons.image_not_supported,
+                  size: 100,
+                  color: Colors.grey,
+                );
+              },
             ),
-            // --- AKHIR PERUBAHAN ---
+            // --- AKHIR PERBAIKAN ---
           ),
         ),
+        // ... kode bagian text di bawah tetap sama ...
         Expanded(
           flex: 2,
           child: Container(
@@ -56,7 +58,7 @@ class OnboardingPageContent extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 Text(
-                  item.title, // Menggunakan data dari item
+                  item.title,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 28,
@@ -66,7 +68,7 @@ class OnboardingPageContent extends StatelessWidget {
                 ),
                 const SizedBox(height: 15),
                 Text(
-                  item.description, // Menggunakan data dari item
+                  item.description,
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 16, color: Colors.blueGrey[700]),
                 ),

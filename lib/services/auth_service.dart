@@ -3,8 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/profile.dart';
 
-/// Class ini bertanggung jawab untuk semua logika otentikasi
-/// seperti daftar, masuk, keluar, dan manajemen profil.
 class AuthService {
   final SupabaseClient _client = Supabase.instance.client;
 
@@ -18,28 +16,48 @@ class AuthService {
       await _client.auth.signUp(
         email: email,
         password: password,
-        data: {'full_name': fullName, 'role': 'user'},
+        // Kita kirim metadata full_name, tapi role akan diurus otomatis oleh Trigger SQL
+        data: {'full_name': fullName},
       );
     } on AuthException catch (e) {
       throw Exception(e.message);
     }
   }
 
-  /// Memproses login dan mengembalikan role.
+  /// Memproses login dan mengembalikan role dari TABEL PROFILES.
   Future<String> signIn({
     required String email,
     required String password,
   }) async {
     try {
+      // 1. Login ke Supabase Auth
       final response = await _client.auth.signInWithPassword(
         email: email,
         password: password,
       );
+
       final user = response.user;
       if (user == null) throw Exception('Pengguna tidak ditemukan.');
-      return user.userMetadata?['role'] ?? 'user';
+
+      // 2. <--- PERUBAHAN PENTING: AMBIL ROLE DARI TABEL 'profiles'
+      // Kita query tabel profiles berdasarkan ID user yang baru login
+      final profileData =
+          await _client
+              .from('profiles')
+              .select('role')
+              .eq('id', user.id)
+              .single();
+
+      // 3. Kembalikan role (defaults to 'user' jika null)
+      return profileData['role'] as String? ?? 'user';
     } on AuthException catch (e) {
+      // Menangkap error salah password/email dari Supabase
       throw Exception(e.message);
+    } catch (e) {
+      // Menangkap error lain (misal koneksi database bermasalah)
+      debugPrint("Error fetching role: $e");
+      // Jika gagal ambil role, kita anggap user biasa demi keamanan, atau lempar error
+      return 'user';
     }
   }
 
@@ -47,6 +65,7 @@ class AuthService {
   Future<Profile> getProfile() async {
     final user = _client.auth.currentUser;
     if (user == null) throw Exception('Tidak ada pengguna yang login.');
+
     try {
       final response =
           await _client
@@ -58,8 +77,11 @@ class AuthService {
       if (response != null) {
         return Profile.fromJson(response);
       } else {
+        // Fallback jika profil belum ada (seharusnya sudah ada karena Trigger)
+        // tapi tidak ada salahnya code defensive seperti ini
         final newProfileData = {
           'id': user.id,
+          'email': user.email, // Pastikan email ikut disimpan
           'full_name': user.userMetadata?['full_name'] ?? 'Pengguna Baru',
         };
         final createdResponse =
@@ -71,16 +93,17 @@ class AuthService {
         return Profile.fromJson(createdResponse);
       }
     } catch (error) {
-      throw Exception('Gagal memuat atau membuat profil pengguna.');
+      debugPrint("Error getProfile: $error");
+      throw Exception('Gagal memuat profil pengguna.');
     }
   }
 
-  /// Mengambil objek User Supabase saat ini.
+  // ... (Sisa method di bawah ini TIDAK PERLU DIUBAH, sudah benar) ...
+
   User? getCurrentUser() {
     return _client.auth.currentUser;
   }
 
-  /// Mengeluarkan pengguna (logout).
   Future<void> signOut() async {
     try {
       await _client.auth.signOut();
@@ -89,7 +112,6 @@ class AuthService {
     }
   }
 
-  /// Meng-upload gambar avatar dari bytes (untuk Web).
   Future<String> uploadAvatar(Uint8List imageBytes) async {
     final user = _client.auth.currentUser;
     if (user == null) throw Exception('Tidak ada pengguna yang login.');
@@ -111,7 +133,6 @@ class AuthService {
     }
   }
 
-  /// Memperbarui data profil pengguna.
   Future<void> updateProfile({
     required String fullName,
     String? avatarUrl,
@@ -128,7 +149,9 @@ class AuthService {
       'gender': gender,
       'date_of_birth': dateOfBirth?.toIso8601String(),
       'phone_number': phoneNumber,
-      'updated_at': DateTime.now().toIso8601String(),
+      // Hapus 'updated_at' jika kolom tersebut belum dibuat di database
+      // atau biarkan jika kamu memang punya kolom itu.
+      // 'updated_at': DateTime.now().toIso8601String(),
       if (avatarUrl != null) 'avatar_url': avatarUrl,
     };
 
@@ -139,7 +162,6 @@ class AuthService {
     }
   }
 
-  /// Memperbarui kata sandi pengguna yang sedang login.
   Future<void> updatePassword(String newPassword) async {
     try {
       await _client.auth.updateUser(UserAttributes(password: newPassword));
